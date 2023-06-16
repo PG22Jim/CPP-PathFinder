@@ -1,0 +1,8 @@
+﻿  GridTable.cpp
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(123,11): warning C4101: 'upNode': unreferenced local variable
+  Node.cpp
+  PathFinder.cpp
+  SquareData.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  PathFinder.vcxproj -> D:\C++Projects\PathFinder\PathFinder\x64\Debug\PathFinder.exe
