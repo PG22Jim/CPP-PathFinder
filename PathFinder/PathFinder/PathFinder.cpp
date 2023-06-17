@@ -19,14 +19,14 @@ void drawGrid(GridTable* gridTable)
     float squareSizeY = static_cast<float>(HEIGHT) / GRID_ROWS;
 
 
-    std::vector<SquareData*> dataList = gridTable->GetSquareList();
     int listSize = GRID_COLUMNS * GRID_ROWS;
 
-    for (int a = 0; a < listSize; a++)
+    for (const auto& eachMapObject : gridTable->gridData)
     {
-        SquareData* iteratingSquare = dataList.at(a);
-        int column = iteratingSquare->getColumnIndex();
-        int row = iteratingSquare->getRowIndex();
+        SquareData* iteratingSquare = eachMapObject.second;
+
+        int column = iteratingSquare->getPositionValue(true);
+        int row = iteratingSquare->getPositionValue(false);
         SquareStatus status = iteratingSquare->getSquareStatus();
 
         float x = row * squareSizeX;
@@ -56,7 +56,48 @@ void drawGrid(GridTable* gridTable)
         glVertex2f(x + squareSizeX, y + squareSizeY);
         glVertex2f(x, y + squareSizeY);
         glEnd();
+
     }
+
+
+
+
+    //for (int a = 0; a < listSize; a++)
+    //{
+    //    SquareData* iteratingSquare = dataList.at(a);
+    //    Key iteratingKey = iteratingSquare->getKey();
+    //    int column = iteratingKey.getColumn();
+    //    int row = iteratingKey.getRow();
+    //    SquareStatus status = iteratingSquare->getSquareStatus();
+
+    //    float x = row * squareSizeX;
+    //    float y = column * squareSizeY;
+
+
+
+    //    if (status == SquareStatus::Empty)
+    //        glColor3f(1.0f, 1.0f, 1.0f); // draw white as empty space
+    //    else if (status == SquareStatus::Start)
+    //    {
+    //        glColor3f(0.0f, 1.0f, 0.0f); // draw green square as start
+    //        std::cout << " column: " << column << "  row: " << row << std::endl;
+    //    }
+    //    else if (status == SquareStatus::Goal)
+    //    {
+    //        glColor3f(0.0f, 0.0f, 1.0f); // draw blue square as goal
+    //        std::cout << " column: " << column << "  row: " << row << std::endl;
+    //    }
+    //    else
+    //        glColor3f(1.0f, 0.0f, 0.0f); // draw red square as wall
+
+
+    //    glBegin(GL_QUADS);
+    //    glVertex2f(x, y);
+    //    glVertex2f(x + squareSizeX, y);
+    //    glVertex2f(x + squareSizeX, y + squareSizeY);
+    //    glVertex2f(x, y + squareSizeY);
+    //    glEnd();
+    //}
 }
 
 int main()
@@ -64,7 +105,7 @@ int main()
     if (!glfwInit())
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Maze Clicker", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Path Finder", NULL, NULL);
     if (!window)
     {
         glfwTerminate();

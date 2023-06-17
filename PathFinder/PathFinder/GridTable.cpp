@@ -42,8 +42,11 @@ void GridTable::initializeGridTable()
                 goalSquareData = newData;
                 goalSquareData->setSquareStatus(SquareStatus::Goal);
             }
-
-            SquareList.push_back(newData);
+            
+            //gridData[newData->getKey()] = newData;
+            SquareKey newDataKey = newData->getKey();
+            gridData.insert({ newDataKey , newData});
+            // SquareList.push_back(newData);
 
             iterationIndex++;
         }
@@ -64,24 +67,33 @@ SquareData* GridTable::generateRandomSquare(int maxColumn, int maxRow, SquareSta
 
 bool GridTable::squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB)
 {
-    return dataA->getColumnIndex() == dataB->getColumnIndex() && dataA->getRowIndex() == dataB->getRowIndex();
+    bool isKeySame = dataA->getKey().operator==(dataB->getKey());
+    return isKeySame;
 }
 
-SquareData* GridTable::GetSquareData(int requestColumn, int requestRow)
+SquareData* GridTable::getSquareData(int requestColumn, int requestRow)
 {
+    SquareKey findingKey{ requestColumn, requestRow };
+    auto foundObject = gridData.find(findingKey);
 
-    for (int i = 0; i < squareListSize; ++i)
-    {
-        int column = SquareList.at(i)->getColumnIndex();
-        int row = SquareList.at(i)->getRowIndex();
+    if (foundObject != gridData.end())
+        return foundObject->second;
+    else
+        return nullptr;
 
-        if (column == requestColumn && row == requestRow)
-        {
-            return SquareList[i];
-        }
-    }
+    //for (int i = 0; i < squareListSize; ++i)
+    //{
+    //    Key iteratingKey = SquareList.at(i)->getKey();
+    //    int column = iteratingKey.getColumn();
+    //    int row = iteratingKey.getRow();
 
-    return nullptr;
+    //    if (column == requestColumn && row == requestRow)
+    //    {
+    //        return SquareList[i];
+    //    }
+    //}
+
+    //return nullptr;
 }
 
 void GridTable::getPathToGoal()
@@ -94,17 +106,30 @@ void GridTable::getPathToGoal()
 
     while (!openSet.empty())
     {
-        // Get list of valid point to explore
-        std::vector<Node*> exploringNode = exploreNode(currentNode);
+        // Explore iterating node and update other possible exploring node into open set
+        std::vector<Node*> newExplorableNodes = tryExploreNode(currentNode);
 
-        // If return empty list, means this explore is not valid
-        //if(exploringNode )
-
-        for (Node* eachNode : exploringNode)
+        // Check if new return new Explorable Nodes has node that is goal
+        for (Node* eachNewNode : newExplorableNodes)
         {
-            openSet.push_back(eachNode);
-            removeOpenSet(currentNode);
-            addNewCloseSet(currentNode);
+            // If status is goal
+            SquareStatus eachStatus = eachNewNode->data->getSquareStatus();
+            if (eachStatus == SquareStatus::Goal) 
+            {
+                // assign it as pathToGoal, remove from openSet, then clear openSet
+                pathToGoal = eachNewNode;
+                removeOpenSet(pathToGoal);
+                // TODO: clear all nodes that are not goal
+                openSet.clear();
+                continue;
+            }
+        }
+
+
+        Node* nextExploreNode = findNextExploreNode();
+        if (nextExploreNode) 
+        {
+            currentNode = nextExploreNode;
         }
 
     }
@@ -112,34 +137,199 @@ void GridTable::getPathToGoal()
 
 }
 
-std::vector<Node*> GridTable::exploreNode(Node* exploringNode)
+std::vector<Node*> GridTable::tryExploreNode(Node* exploringNode)
 {
     std::vector<Node*> returnVector;
 
     SquareData* exploringSquareData = exploringNode->data;
-    int exploreColumn = exploringSquareData->getColumnIndex();
-    int exploreRow = exploringSquareData->getRowIndex();
+    SquareKey exploringKey = exploringSquareData->getKey();
+    int exploreColumn = exploringKey.getColumn();
+    int exploreRow = exploringKey.getRow();
 
-    Node* upNode;
+    
+    // Up square from the exploring square, if position is valid, keep checking
     if ((exploreColumn - 1) >= 0 && (exploreColumn - 1) <= 9)
     {
+        // if squareData is in the gridData, keep checking
+        SquareData* checkingSquare = getSquareData((exploreColumn - 1), exploreRow);
+        if (checkingSquare) 
+        {
+            const bool bCanExplore = canExploreThisSquare(checkingSquare);
+            //const bool bIsExploringSquare = squareCompare_IsSamePos(checkingSquare, exploringSquareData);
+
+            // if square is explorable and is not same square to exploring node
+            if (bCanExplore)
+            {
+                // make it as new node and add it to the openSet
+                Node* newExplorableNode = new Node(checkingSquare, exploringNode);
+                openSet.push_back(newExplorableNode);
+                returnVector.push_back(newExplorableNode);
+            }
+        }
+    }
+
+    // Down square from the exploring square, if position is valid, keep checking
+    if ((exploreColumn + 1) >= 0 && (exploreColumn + 1) <= 9)
+    {
+        // if squareData is in the gridData, keep checking
+        SquareData* checkingSquare = getSquareData((exploreColumn + 1), exploreRow);
+        if (checkingSquare)
+        {
+            const bool bCanExplore = canExploreThisSquare(checkingSquare);
+            //const bool bIsExploringSquare = squareCompare_IsSamePos(checkingSquare, exploringSquareData);
+
+            // if square is explorable and is not same square to exploring node
+            if (bCanExplore)
+            {
+                // make it as new node and add it to the openSet
+                Node* newExplorableNode = new Node(checkingSquare, exploringNode);
+                openSet.push_back(newExplorableNode);
+                returnVector.push_back(newExplorableNode);
+            }
+        }
+    }
+
+    // Left square from the exploring square, if position is valid, keep checking
+    if ((exploreRow - 1) >= 0 && (exploreRow - 1) <= 9)
+    {
+        // if squareData is in the gridData, keep checking
+        SquareData* checkingSquare = getSquareData(exploreColumn, exploreRow - 1);
+        if (checkingSquare)
+        {
+            const bool bCanExplore = canExploreThisSquare(checkingSquare);
+            //const bool bIsExploringSquare = squareCompare_IsSamePos(checkingSquare, exploringSquareData);
+
+            // if square is explorable and is not same square to exploring node
+            if (bCanExplore)
+            {
+                // make it as new node and add it to the openSet
+                Node* newExplorableNode = new Node(checkingSquare, exploringNode);
+                openSet.push_back(newExplorableNode);
+                returnVector.push_back(newExplorableNode);
+            }
+        }
+    }
+
+    // Right square from the exploring square, if position is valid, keep checking
+    if ((exploreRow + 1) >= 0 && (exploreRow + 1) <= 9)
+    {
+        // if squareData is in the gridData, keep checking
+        SquareData* checkingSquare = getSquareData(exploreColumn, exploreRow + 1);
+        if (checkingSquare)
+        {
+            const bool bCanExplore = canExploreThisSquare(checkingSquare);
+            //const bool bIsExploringSquare = squareCompare_IsSamePos(checkingSquare, exploringSquareData);
+
+            // if square is explorable and is not same square to exploring node
+            if (bCanExplore)
+            {
+                // make it as new node and add it to the openSet
+                Node* newExplorableNode = new Node(checkingSquare, exploringNode);
+                openSet.push_back(newExplorableNode);
+                returnVector.push_back(newExplorableNode);
+            }
+        }
+    }
+
+
+    // move exploring Node from openSet to closeSet
+    removeOpenSet(exploringNode);
+    addNewCloseSet(exploringNode);
+
+    return returnVector;
+}
+
+bool GridTable::canExploreThisSquare(SquareData* checkingData)
+{
+    // get status and key of the checking data
+    SquareStatus checkingSquareStatus = checkingData->getSquareStatus();
+    SquareKey checkingSquareKey = checkingData->getKey();
+
+    if(checkingSquareStatus == ::Wall) return false;
+    if(checkingSquareStatus == ::Start) return false;
+
+
+    int currentCloseSetSize = closeSet.size();
+    if (currentCloseSetSize > 0)
+    {
+        // check if checking data is in closeSet
+        for (int i = 0; i < currentCloseSetSize; i++)
+        {
+            // If key is same, squareData cannot be explore
+            SquareKey closeSetKey = closeSet.at(i)->data->getKey();
+            bool isKeySame = checkingSquareKey.operator==(closeSetKey);
+            if (isKeySame) 
+            {
+                return false;
+            }
+        }
+    }
+
+    int currentOpenSetSize = openSet.size();
+    if (currentOpenSetSize > 0) 
+    {
+        // check if checking data is in openSet
+        for (int i = 0; i < currentOpenSetSize; i++) 
+        {
+            // if key is same, squareData cannot be explore
+            SquareKey openSetKey = openSet.at(i)->data->getKey();
+            bool isKeySame = checkingSquareKey.operator==(openSetKey);
+            if (isKeySame)
+            {
+                return false;
+            }
+        }
+    }
+
+    // if checking square is not in closeSet, not in openSet, and is not start, wall, or goal, it means it is exploreable
+    return true;
+}
+
+Node* GridTable::findNextExploreNode()
+{
+    SquareKey startKey = startSquareData->getKey();
+    SquareKey goalKey = goalSquareData->getKey();
+
+    for (Node* eachNode : openSet) 
+    {
+        SquareKey iterateKey = eachNode->data->getKey();
+
+        // G: distance from Node to the Start
+        const int G = iterateKey.findDistance(startKey);
+
+        // H: distance from Node to the Goal
+        const int H = iterateKey.findDistance(goalKey);
+
+        const int sum = G + H;
 
 
     }
 
 
 
-    return returnVector;
-}
 
-bool GridTable::canExploreThisNode(Node* checkingNode)
-{
-    return false;
-}
 
-Node* GridTable::findNextExploreNode()
-{
+
+
+
+
+
+
     return nullptr;
+}
+
+int GridTable::getGValue(Node* targetNode)
+{
+    return 0;
+}
+
+int GridTable::getHValue(Node* targetNode)
+{
+    SquareKey targetKey = targetNode->data->getKey();
+
+
+
+    return 0;
 }
 
 void GridTable::addNewOpenSet(Node* addingNode)
@@ -165,5 +355,5 @@ GridTable::GridTable()
 
 GridTable::~GridTable()
 {
-    SquareList.clear();
+    //gridData.clear();
 }

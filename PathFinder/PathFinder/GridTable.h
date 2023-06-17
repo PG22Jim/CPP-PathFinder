@@ -11,16 +11,15 @@ private:
 
 	// Private variables
 	int squareListSize = 100;
-	Node* initialNode = nullptr;
+	
 	SquareData* startSquareData = nullptr;
 	SquareData* goalSquareData = nullptr;
 
-
-	std::vector<SquareData*> SquareList;
+	//std::vector<SquareData*> SquareList;
 	std::vector<Node*> openSet;
 	std::vector<Node*> closeSet;
 
-
+	Node* pathToGoal = nullptr;
 
 
 	void initializeGridTable();
@@ -29,15 +28,21 @@ private:
 
 	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
 
-	SquareData* GetSquareData(int requestColumn, int requestRow);
+	SquareData* getSquareData(int requestColumn, int requestRow);
 
 	void getPathToGoal();
 
-	std::vector<Node*> exploreNode(Node* exploringNode);
+	std::vector<Node*> tryExploreNode(Node* exploringNode);
 
-	bool canExploreThisNode(Node* checkingNode);
+	bool canExploreThisSquare(SquareData* checkingNode);
 
 	Node* findNextExploreNode();
+
+	int getGValue(Node* targetNode);
+	
+	int getHValue(Node* targetNode);
+
+
 
 	void addNewOpenSet(Node* addingNode);
 
@@ -49,7 +54,8 @@ private:
 public:
 
 	// Get set functions
-	std::vector<SquareData*> GetSquareList() { return SquareList; }
+	//std::unordered_map<Key, SquareData*> getGridData() { return gridData; }
+	std::map<SquareKey, SquareData*> gridData;
 
 
 	GridTable();
