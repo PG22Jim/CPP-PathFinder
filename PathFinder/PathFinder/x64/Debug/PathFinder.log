@@ -1,2 +1,12 @@
 ﻿  PathFinder.cpp
+D:\C++Projects\PathFinder\PathFinder\PathFinder\PathFinder.cpp(24,28): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\PathFinder.cpp(24,25): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
   PathFinder.vcxproj -> D:\C++Projects\PathFinder\PathFinder\x64\Debug\PathFinder.exe

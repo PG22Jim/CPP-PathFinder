@@ -50,8 +50,7 @@ void GridTable::initializeGridTable()
         }
     }
 
-    initializeWalls((maxColumn * maxRow)/5);
-
+    initializeWalls((maxColumn * maxRow)/10);
 }
 
 void GridTable::initializeWalls(int wallNum)

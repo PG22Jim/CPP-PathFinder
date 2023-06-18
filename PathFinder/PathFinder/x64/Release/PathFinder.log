@@ -1,0 +1,14 @@
+﻿  GridTable.cpp
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(282,46): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(298,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(348,26): warning C4553: '==': result of expression not used; did you intend '='?
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(396,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Node.cpp
+  PathFinder.cpp
+  SquareData.cpp
+  Generating code
+  4 of 17 functions (23.5%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  PathFinder.vcxproj -> D:\C++Projects\PathFinder\PathFinder\x64\Release\PathFinder.exe
