@@ -2,8 +2,8 @@
 
 void SquareData::initializeShape(SquareKey key)
 {
-    const int x = SQUARE_SIZE * key.getRow();
-    const int y = SQUARE_SIZE * key.getColumn();
+	const int x = (SQUARE_SIZE * key.getRow());// +PADDING;
+	const int y = (SQUARE_SIZE * key.getColumn());// +PADDING;
 
     squareShape.setPosition(sf::Vector2f(x, y));
     squareShape.setSize(sf::Vector2f(SQUARE_SIZE, SQUARE_SIZE));

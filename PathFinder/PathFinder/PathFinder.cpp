@@ -2,7 +2,6 @@
 //
 
 #include <iostream>
-//#include <GLFW/glfw3.h>
 #include "GridManager.h"
 
 
@@ -56,22 +55,51 @@ int main()
             // Check if the event is a mouse button press
             if (event.type == sf::Event::MouseButtonPressed)
             {
-                // Check if the left mouse button is pressed
-                if (event.mouseButton.button == sf::Mouse::Left)
+                // Get the mouse position relative to the window
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                mousePosition.x;
+                mousePosition.y;
+
+                // Pass mouse position and mouse button event to Grid manager
+                gridManager->OnReceiveUserMouseButton(mousePosition, event.mouseButton.button);
+            }
+
+            if (event.type == sf::Event::KeyPressed)
+            {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
                 {
-                    // Get the mouse position relative to the window
-                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    gridManager->currentRequestStatus = SquareStatus::Empty;
+                    std::cout << " Change Request to Empty " << std::endl;
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
+                {
+                    gridManager->currentRequestStatus = SquareStatus::Start;
+                    std::cout << " Change Request to Start " << std::endl;
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3))
+                {
+                    gridManager->currentRequestStatus = SquareStatus::Goal;
+                    std::cout << " Change Request to Goal " << std::endl;
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
+                {
+                    gridManager->currentRequestStatus = SquareStatus::Wall;
+                    std::cout << " Change Request to Wall " << std::endl;
+                }
 
-                    // Print mouse position if mouse cursor position is in grid
-                    if (GRID_LENGTH > mousePosition.x && GRID_LENGTH > mousePosition.y)
-                    {
-                        const int X = static_cast<int>(mousePosition.x / SQUARE_SIZE);
-                        const int Y = static_cast<int>(mousePosition.y / SQUARE_SIZE);
-
-                        std::cout << "Mouse Position: X: " << X << ", Y: " << Y << std::endl;
-                    }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num9))
+                {
+                    std::cout << " Start Update Path " << std::endl;
+                    gridManager->onUpdatePath();
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num0))
+                {
+                    std::cout << " Start Clear Path " << std::endl;
+                    gridManager->onClearExistPath();
                 }
             }
+            
+                
 
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) window.close();

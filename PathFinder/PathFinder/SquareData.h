@@ -3,11 +3,13 @@
 #include <map>
 #include <stdlib.h>
 #include "SFML/Graphics.hpp"
+#include <iostream>
 
 
 const int GRID_LENGTH = 800;     // Grid Length
 const int GRID_ROWS = 10;   // Number of grid rows
 const int GRID_COLUMNS = 10; // Number of grid columns
+const int PADDING = 40;
 const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
 const float SQUARE_OUTLINE_THICKNESS = 3.0f;
 
@@ -55,11 +57,12 @@ public:
 			return false;
 	}
 
-	int findDistance(const SquareKey& targetKey) 
+	int findDistance(const SquareKey& targetKey) const
 	{
 		int columnDis = targetKey.getColumn() - column;
 		int rowDis = targetKey.getRow() - row;
-		return abs(columnDis + rowDis);
+		int returnSum = abs(columnDis) + abs(rowDis);
+		return returnSum;
 	}
 };
 
@@ -79,6 +82,7 @@ public:
 	//const int getPositionValue(bool isColumn);
 	
 	// Getters and setters
+	const SquareKey& getKey() { return squareKey; }
 	const SquareKey& getKey() const { return squareKey; }
 	void setKey(const SquareKey& newKey) { squareKey = newKey; }
 

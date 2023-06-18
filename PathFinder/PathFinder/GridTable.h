@@ -11,6 +11,8 @@ enum ErrorType
 {
 	MissingStartGoal,
 	NoValidPath,
+	NoPathToCancel,
+	NoMoreWallToAdd,
 	None
 };
 
@@ -35,6 +37,9 @@ private:
 	int maxColumn = 10;
 	int maxRow = 10;
 
+	int maxWallNum = 10;
+	int currentWallNum = 0;
+
 
 
 	Node* pathToGoal = nullptr;
@@ -48,14 +53,17 @@ private:
 
 	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
 
-	SquareData* getSquareData(int requestColumn, int requestRow);
 
 
-	std::vector<Node*> tryExploreNode(Node* exploringNode);
+	std::vector<Node*> getValidNeighborNodes(Node* exploringNode);
+
+	Node* tryExploreNode(int requestColumn, int requestRow, Node* originalNode);
+
+	bool isInGridRange(int requestColumn, int requestRow);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
 
-	void eraseAllNodeNotInPath(Node* pathNode);
+	void eraseAllNodeNotInPath();
 
 	void allocatePathToGoal();
 
@@ -77,11 +85,27 @@ private:
 
 public:
 
-	// Get set functions
-	//std::unordered_map<Key, SquareData*> getGridData() { return gridData; }
 	std::map<SquareKey, SquareData*> gridData;
-
+	
+	
+	// Get set functions
 	Node* getPathToGoal() const { return pathToGoal; }
+	void clearExistingPath();
+
+
+	SquareData* getSquareData(int requestColumn, int requestRow);
+
+	SquareData* getStartSquareData() const { return startSquareData; }
+	void setStartSquareData(SquareData* newData) { startSquareData = newData; }
+
+	SquareData* getGoalSquareData() const { return goalSquareData; }
+	void setGoalSquareData(SquareData* newData) { goalSquareData = newData; }
+
+	void swapSquareStatus(SquareData* squareA, SquareData* squareB);
+
+	bool isAbleToAddMoreWall() const { return currentWallNum + 1 <= maxWallNum; }
+	void currentWallNumIncrement() { currentWallNum++; }
+	void currentWallNumDecrement() { currentWallNum--; }
 	
 	ErrorType tryPathFinding();
 
