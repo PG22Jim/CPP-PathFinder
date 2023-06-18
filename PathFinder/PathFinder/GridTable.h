@@ -59,7 +59,9 @@ private:
 
 	Node* tryExploreNode(int requestColumn, int requestRow, Node* originalNode);
 
-	bool isInGridRange(int requestColumn, int requestRow);
+	Node* getCorrectParentNode(Node* exploredNode);
+
+	Node* getRequestNodeFromOpenSet(const SquareKey& requestingKey);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
 
@@ -69,11 +71,6 @@ private:
 
 
 	Node* findNextExploreNode();
-
-	int getGValue(Node* targetNode);
-	
-	int getHValue(Node* targetNode);
-
 
 
 	void addNewOpenSet(Node* addingNode);

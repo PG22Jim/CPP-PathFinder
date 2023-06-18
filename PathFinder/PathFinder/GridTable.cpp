@@ -109,10 +109,10 @@ void GridTable::clearExistingPath()
         clearingNode = iterateNode;
 
         // while loop to clear path
-        SquareData* currentData = iterateNode->data;
+        SquareData* currentData = iterateNode->getSquareData();
         if (currentData->getSquareStatus() == Path) currentData->setSquareStatus(Empty);
 
-        iterateNode = iterateNode->previousData;
+        iterateNode = iterateNode->getParentNode();
         clearingNode = nullptr;
     }
 }
@@ -148,7 +148,7 @@ ErrorType GridTable::tryPathFinding()
     SquareKey currentStartSquareKey = startSquareData->getKey();
     int startHCost = currentStartSquareKey.findDistance(goalSquareData->getKey());
 
-    Node* currentNode = new Node(startSquareData, nullptr, 0, startHCost);
+    Node* currentNode = new Node(startSquareData, nullptr, startHCost);
     addNewOpenSet(currentNode);
 
     while (!openSet.empty())
@@ -161,14 +161,13 @@ ErrorType GridTable::tryPathFinding()
             for (Node* eachNewNode : newExplorableNodes)
             {
                 // If status is goal
-                SquareStatus eachStatus = eachNewNode->data->getSquareStatus();
+                SquareStatus eachStatus = eachNewNode->getSquareData()->getSquareStatus();
                 if (eachStatus == SquareStatus::Goal) 
                 {
                     // assign it as pathToGoal, remove from openSet, then clear openSet
                     pathToGoal = eachNewNode;
                     removeOpenSet(pathToGoal);
                     allocatePathToGoal();
-                    // TODO: clear all nodes that are not goal
                     eraseAllNodeNotInPath();
                     return ErrorType::None;
                 }
@@ -193,7 +192,7 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
 {
     std::vector<Node*> returnVector;
 
-    SquareData* exploringSquareData = exploringNode->data;
+    SquareData* exploringSquareData = exploringNode->getSquareData();
     SquareKey exploringKey = exploringSquareData->getKey();
     int exploreColumn = exploringKey.getColumn();
     int exploreRow = exploringKey.getRow();
@@ -229,18 +228,17 @@ Node* GridTable::tryExploreNode(int requestColumn, int requestRow, Node* origina
     if (checkingSquare)
     {
         const bool bCanExplore = canExploreThisSquare(checkingSquare);
-        //const bool bIsExploringSquare = squareCompare_IsSamePos(checkingSquare, exploringSquareData);
 
         // if square is explorable and is not same square to exploring node
         if (bCanExplore)
         {
-            // make it as new node with calculate g and h cost, then add to the openSet
+            // make it as new node with calculate h cost, then add to the openSet
 
-            int checkingGCost = checkingSquare->getKey().findDistance(getStartSquareData()->getKey());
             int checkingHCost = checkingSquare->getKey().findDistance(getGoalSquareData()->getKey());
 
-            // TODO: Probably should have a way to get other close path exploringNode
-            returnNode = new Node(checkingSquare, originalNode, checkingGCost, checkingHCost);
+            returnNode = new Node(checkingSquare, originalNode, checkingHCost);
+            Node* supposeCorrectParent = getCorrectParentNode(returnNode);
+            returnNode->setParentNode(supposeCorrectParent);
             openSet.push_back(returnNode);
         }
     }
@@ -248,10 +246,107 @@ Node* GridTable::tryExploreNode(int requestColumn, int requestRow, Node* origina
     return returnNode;
 }
 
-
-bool GridTable::isInGridRange(int requestColumn, int requestRow)
+Node* GridTable::getCorrectParentNode(Node* exploredNode)
 {
-    return false;
+    // Get key from the passing explored node
+    SquareKey exploredKey = exploredNode->getSquareData()->getKey();
+    int exploredColumn = exploredKey.getColumn();
+    int exploredRow = exploredKey.getRow();
+
+    // set current shortest parent node as the passing explored node, and 
+    Node* allocatedShortestParentNode = exploredNode->getParentNode();
+    Node* currentShortestParentNode = allocatedShortestParentNode;
+    
+    const SquareKey currentShortestParentKey = currentShortestParentNode->getSquareData()->getKey();
+    int currentSmallestGCost = currentShortestParentNode->getGCost();
+
+
+    // check if request key is same to correct Node's parent, it means up node and parent node are same, no need to compare
+    const SquareKey upSquareKey = SquareKey((exploredColumn - 1), exploredRow);
+    if (!(upSquareKey.operator==(currentShortestParentKey)))
+    {
+        // Try get up down left right square of correctPathNode, if function return valid node it means it is in openset
+        Node* upNode = getRequestNodeFromOpenSet(upSquareKey);
+        if (upNode) 
+        {
+            const int upNodeG = upNode->getGCost();
+            if (upNodeG < currentSmallestGCost)
+            {
+                currentShortestParentNode = upNode;
+                currentSmallestGCost = upNodeG;
+            }
+        }
+    }
+
+    // check if request key is same to correct Node's parent, it means down node and parent node are same, no need to compare
+    const SquareKey downSquareKey = SquareKey((exploredColumn + 1), exploredRow);
+    if (!(downSquareKey.operator==(currentShortestParentKey)))
+    {
+        // Try get up down left right square of correctPathNode, if function return valid node it means it is in openset
+        Node* downNode = getRequestNodeFromOpenSet(downSquareKey);
+        if (downNode)
+        {
+            const int downNodeG = downNode->getGCost();
+            if (downNodeG < currentSmallestGCost)
+            {
+                currentShortestParentNode = downNode;
+                currentSmallestGCost = downNodeG;
+            }
+        }
+    }
+
+
+    // check if request key is same to correct Node's parent, it means up node and parent node are same, no need to compare
+    const SquareKey leftSquareKey = SquareKey(exploredColumn, exploredRow - 1);
+    if (!(leftSquareKey.operator==(currentShortestParentKey)))
+    {
+        // Try get up down left right square of correctPathNode, if function return valid node it means it is in openset
+        Node* leftNode = getRequestNodeFromOpenSet(leftSquareKey);
+        if (leftNode)
+        {
+            const int leftNodeG = leftNode->getGCost();
+            if (leftNodeG < currentSmallestGCost)
+            {
+                currentShortestParentNode = leftNode;
+                currentSmallestGCost = leftNodeG;
+            }
+        }
+    }
+
+    // check if request key is same to correct Node's parent, it means up node and parent node are same, no need to compare
+    const SquareKey rightSquareKey = SquareKey(exploredColumn, exploredRow + 1);
+    if (!(rightSquareKey.operator==(currentShortestParentKey)))
+    {
+        // Try get up down left right square of correctPathNode, if function return valid node it means it is in openset
+        Node* rightNode = getRequestNodeFromOpenSet(rightSquareKey);
+        if (rightNode)
+        {
+            const int rightNodeG = rightNode->getGCost();
+            if (rightNodeG < currentSmallestGCost)
+            {
+                currentShortestParentNode = rightNode;
+                currentSmallestGCost = rightNodeG;
+            }
+        }
+    }
+
+    currentShortestParentNode->setGCost(currentSmallestGCost);
+    return currentShortestParentNode;
+}
+
+Node* GridTable::getRequestNodeFromOpenSet(const SquareKey& requestingKey)
+{
+
+    for (Node* eachOpenNode : openSet) 
+    {
+        const bool bHasFound = requestingKey.operator==(eachOpenNode->getSquareData()->getKey());
+        if (bHasFound) return eachOpenNode;
+    }
+
+
+
+
+    return nullptr;
 }
 
 bool GridTable::canExploreThisSquare(SquareData* checkingData)
@@ -271,7 +366,7 @@ bool GridTable::canExploreThisSquare(SquareData* checkingData)
         for (int i = 0; i < currentCloseSetSize; i++)
         {
             // If key is same, squareData cannot be explore
-            SquareKey closeSetKey = closeSet.at(i)->data->getKey();
+            SquareKey closeSetKey = closeSet.at(i)->getSquareData()->getKey();
             bool isKeySame = checkingSquareKey.operator==(closeSetKey);
             if (isKeySame) 
             {
@@ -287,7 +382,7 @@ bool GridTable::canExploreThisSquare(SquareData* checkingData)
         for (int i = 0; i < currentOpenSetSize; i++) 
         {
             // if key is same, squareData cannot be explore
-            SquareKey openSetKey = openSet.at(i)->data->getKey();
+            SquareKey openSetKey = openSet.at(i)->getSquareData()->getKey();
             bool isKeySame = checkingSquareKey.operator==(openSetKey);
             if (isKeySame)
             {
@@ -328,7 +423,7 @@ void GridTable::eraseAllNodeNotInPath()
         for (Node* eachOpenNode : openSet) 
         {
             // For each open node, check if it is path, start, or goal, if true, no need to erase pointer
-            SquareStatus eachNodeStatus = eachOpenNode->data->getSquareStatus();
+            SquareStatus eachNodeStatus = eachOpenNode->getSquareData()->getSquareStatus();
             if (eachNodeStatus == Start || eachNodeStatus == Goal || eachNodeStatus == Path) continue;
 
             eachOpenNode = nullptr;
@@ -338,7 +433,7 @@ void GridTable::eraseAllNodeNotInPath()
         for (Node* eachOpenNode : closeSet)
         {
             // For each open node, check if it is path, start, or goal, if true, no need to erase pointer
-            SquareStatus eachNodeStatus = eachOpenNode->data->getSquareStatus();
+            SquareStatus eachNodeStatus = eachOpenNode->getSquareData()->getSquareStatus();
             if (eachNodeStatus == Start || eachNodeStatus == Goal || eachNodeStatus == Path) continue;
 
             eachOpenNode = nullptr;
@@ -350,20 +445,40 @@ void GridTable::eraseAllNodeNotInPath()
 
 void GridTable::allocatePathToGoal()
 {
+    for(Node* openNode : openSet)
+    {
+        SquareData* iterateData = openNode->getSquareData();
+        SquareStatus iterateStatus = iterateData->getSquareStatus();
+        if (iterateStatus == SquareStatus::Empty)
+        {
+            iterateData->setSquareStatus(SquareStatus::OpenSet);
+        }
+    }
+
+    for (Node* closeNode : closeSet)
+    {
+        SquareData* iterateData = closeNode->getSquareData();
+        SquareStatus iterateStatus = iterateData->getSquareStatus();
+        if (iterateStatus == SquareStatus::Empty)
+        {
+            iterateData->setSquareStatus(SquareStatus::CloseSet);
+        }
+    }
+
     if (pathToGoal) 
     {
         Node* iterateNode = pathToGoal;
 
         while (iterateNode)
         {
-            SquareData* iterateData = iterateNode->data;
+            SquareData* iterateData = iterateNode->getSquareData();
             SquareStatus iterateStatus = iterateData->getSquareStatus();
-            if (iterateStatus == SquareStatus::Empty) 
+            if (iterateStatus == SquareStatus::Empty || iterateStatus == SquareStatus::CloseSet)
             {
                 iterateData->setSquareStatus(SquareStatus::Path);
             }
 
-            iterateNode = iterateNode->previousData;
+            iterateNode = iterateNode->getParentNode();
         }
     }
 }
@@ -375,27 +490,22 @@ Node* GridTable::findNextExploreNode()
     // if there is no node in openset
     if (openSetSize == 0)
     {
-        std::cout << "OpenSet Empty " << std::endl;
         return nullptr;
     }
 
     // If there is only one node in openset, just return that
     if (openSetSize == 1)
     {
-        std::cout << "OpenSet Only Has One " << std::endl;
         return openSet.at(0);
     }
-    std::cout << "============================== " << std::endl;
-    std::cout << "============================== " << std::endl;
-    std::cout << "============================== " << std::endl;
-    std::cout << "OpenSet Has More Than One Node " << std::endl;
+
 
     // if there are more than 1 node in openSet
     SquareKey startKey = startSquareData->getKey();
     SquareKey goalKey = goalSquareData->getKey();
 
     Node* bestNode = openSet.at(0);
-    SquareKey bestNodeKey = bestNode->data->getKey();
+    SquareKey bestNodeKey = bestNode->getSquareData()->getKey();
     // G: distance from Node to the Start
     int bestNodeG = bestNodeKey.findDistance(startKey);
     // H: distance from Node to the Goal
@@ -403,16 +513,10 @@ Node* GridTable::findNextExploreNode()
 
     int bestNodeSum = bestNodeG + bestNodeH;
 
-
-    std::cout << "Start to find best node " << std::endl;
-    std::cout << "============================== " << std::endl;
     for (int i = 1; i < openSetSize; i++)
     {
-        std::cout << "Iteration: " << i << std::endl;
-        std::cout << "============================== " << std::endl;
-        std::cout << "Current BestNode: X: [" << bestNode->data->getKey().getRow() << "]  Y: [" << bestNode->data->getKey().getColumn()<< "]  H: [" << bestNodeH << "]  Sum: [" << bestNodeSum << "]" << std::endl;
         Node* iteratingNode = openSet.at(i);
-        SquareKey iterateKey = iteratingNode->data->getKey();
+        SquareKey iterateKey = iteratingNode->getSquareData()->getKey();
 
         // G: distance from Node to the Start
         const int iterateG = iterateKey.findDistance(startKey);
@@ -420,27 +524,22 @@ Node* GridTable::findNextExploreNode()
         const int iterateH = iterateKey.findDistance(goalKey);
         const int iterateSum = iterateG + iterateH;
 
-        std::cout << "Current IterNode: X: [" << iterateKey.getRow() << "]  Y: [" << iterateKey.getColumn() << "]  H: [" << iterateH << "]  Sum: [" << iterateSum << "]" << std::endl;
 
         
 
         // if sum is bigger than best sum, continue to next iteration
         if (iterateSum > bestNodeSum)
         {
-            std::cout << "Not BestNode" << std::endl;
-
             continue;
         }
 
         // if sums are the same
         else if (iterateSum == bestNodeSum)
         {
-            std::cout << "Sum Same" << std::endl;
 
             // check if H value is smaller, if small, iterate node becomes the best node
             if (iterateH < bestNodeH)
             {
-                std::cout << "Become BestNode Due to smaller H" << std::endl;
 
                 bestNode = openSet.at(i);
                 bestNodeH = iterateH;
@@ -449,12 +548,11 @@ Node* GridTable::findNextExploreNode()
             // if H value is same, compare both Node's path steps
             else if (iterateH == bestNodeH)
             {
-                int iterateNodeStep = iteratingNode->getSteps();
-                int bestNodeStep = bestNode->getSteps();
+                int iterateNodeStep = iteratingNode->getGCost();
+                int bestNodeStep = bestNode->getGCost();
 
                 if (iterateNodeStep < bestNodeStep)
                 {
-                    std::cout << "Become BestNode Due to smaller steps" << std::endl;
                     bestNode = openSet.at(i);
                     bestNodeH = iterateH;
                     bestNodeSum = iterateSum;
@@ -463,7 +561,6 @@ Node* GridTable::findNextExploreNode()
         }
         else
         {
-            std::cout << "Become BestNode Due to smaller sum" << std::endl;
             // if iterate sum is smaller than best sum, iterate node becomes the best node
             bestNode = openSet.at(i);
             bestNodeH = iterateH;
@@ -471,26 +568,9 @@ Node* GridTable::findNextExploreNode()
         }
     }
 
-    std::cout << "Iteration Finish " << std::endl;
-    std::cout << "============================== " << std::endl;
-    std::cout << "Current BestNode: X: [" << bestNode->data->getKey().getRow() << "]  Y: [" << bestNode->data->getKey().getColumn() << "]  H: [" << bestNodeH << "]  Sum: [" << bestNodeSum << "]" << std::endl;
-
     return bestNode;
 }
 
-int GridTable::getGValue(Node* targetNode)
-{
-    return 0;
-}
-
-int GridTable::getHValue(Node* targetNode)
-{
-    SquareKey targetKey = targetNode->data->getKey();
-
-
-
-    return 0;
-}
 
 void GridTable::addNewOpenSet(Node* addingNode)
 {

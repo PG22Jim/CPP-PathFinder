@@ -9,7 +9,7 @@ const int WIDTH = 1200;      // Window width
 const int HEIGHT = 900;     // Window height
 
 
-const std::string PATHFOUND_MESSAGE = " Path Found!! ";
+const std::string PATHFOUND_MESSAGE = "Path Found!! ";
 
 
 sf::Vector2f getPosition(SquareKey key) 
@@ -39,7 +39,6 @@ int main()
     //{
     //    ErrorType resultError = gridTable->tryPathFinding();
     //}
-
 
 
     sf::RectangleShape backGround;
@@ -129,11 +128,18 @@ int main()
                 eachData->updateRectShapeColor(sf::Color::Green);
             else if (eachStatus == Goal)
                 eachData->updateRectShapeColor(sf::Color::Blue);
+            else if (eachStatus == CloseSet)
+                eachData->updateRectShapeColor(PURPLE);
+            else if (eachStatus == OpenSet)
+                eachData->updateRectShapeColor(ORANGE);
             else
+            {
                 eachData->updateRectShapeColor(sf::Color::Cyan);
+            }
 
             window.draw(eachData->getShape());
         }
+
 
         // display window
         window.display();

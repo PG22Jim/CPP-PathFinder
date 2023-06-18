@@ -1,30 +1,5 @@
-﻿  GridManager.cpp
-  GridTable.cpp
-D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(267,46): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(283,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(373,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Node.cpp
-  PathFinder.cpp
-D:\C++Projects\PathFinder\PathFinder\PathFinder\PathFinder.cpp(20,28): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\C++Projects\PathFinder\PathFinder\PathFinder\PathFinder.cpp(20,25): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  SquareData.cpp
-D:\C++Projects\PathFinder\PathFinder\PathFinder\SquareData.cpp(8,45): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\C++Projects\PathFinder\PathFinder\PathFinder\SquareData.cpp(8,42): warning C4244: 'argument': conversion from 'const int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  Generating Code...
+﻿  GridTable.cpp
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(365,46): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(381,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(491,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   PathFinder.vcxproj -> D:\C++Projects\PathFinder\PathFinder\x64\Debug\PathFinder.exe

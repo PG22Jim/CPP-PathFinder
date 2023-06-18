@@ -14,13 +14,18 @@ const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
 const float SQUARE_OUTLINE_THICKNESS = 3.0f;
 
 
+const sf::Color ORANGE = sf::Color(255, 127, 0);
+const sf::Color PURPLE = sf::Color(127, 0, 255);
+
 enum SquareStatus
 {
 	Empty,
 	Wall,
 	Start,
 	Goal,
-	Path
+	Path,
+	OpenSet,
+	CloseSet,
 };
 
 // Custom key type made by column and row, it is for hash table

@@ -1,18 +1,15 @@
 #include "Node.h"
 #include <iostream>
 
-int Node::getSteps()
+int Node::calculatePathSteps()
 {
     int iterateNodeStep = 0;
 
     Node* stepCountingNode = this;
     while (stepCountingNode)
     {
-        stepCountingNode = stepCountingNode->previousData;
+        stepCountingNode = stepCountingNode->getParentNode();
         iterateNodeStep++;
     }
-    
-    std::cout << "Steps: " << iterateNodeStep << std::endl;
-
     return iterateNodeStep;
 }
