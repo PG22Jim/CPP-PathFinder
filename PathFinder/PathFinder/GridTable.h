@@ -19,10 +19,16 @@ private:
 	std::vector<Node*> openSet;
 	std::vector<Node*> closeSet;
 
+	int maxColumn = 10;
+	int maxRow = 10;
+
+
 	Node* pathToGoal = nullptr;
 
 
 	void initializeGridTable();
+
+	void initializeWalls(int wallNum);
 
 	SquareData* generateRandomSquare(int maxColumn, int maxRow, SquareStatus requestStatus);
 
@@ -30,11 +36,15 @@ private:
 
 	SquareData* getSquareData(int requestColumn, int requestRow);
 
-	void getPathToGoal();
 
 	std::vector<Node*> tryExploreNode(Node* exploringNode);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
+
+	void eraseAllNodeNotInPath(Node* pathNode);
+
+	void allocatePathToGoal();
+
 
 	Node* findNextExploreNode();
 
@@ -57,8 +67,12 @@ public:
 	//std::unordered_map<Key, SquareData*> getGridData() { return gridData; }
 	std::map<SquareKey, SquareData*> gridData;
 
+	Node* getPathToGoal() const { return pathToGoal; }
+	
+	void tryPathFinding();
 
 	GridTable();
+	GridTable(int column, int row);
 	~GridTable();
 };
 

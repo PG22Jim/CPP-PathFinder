@@ -48,9 +48,9 @@ public:
 
 	int findDistance(const SquareKey& targetKey) 
 	{
-		int columnDis = column - targetKey.getColumn();
-		int rowDis = row - targetKey.getRow();
-		return columnDis + rowDis;
+		int columnDis = targetKey.getColumn() - column;
+		int rowDis = targetKey.getRow() - row;
+		return abs(columnDis + rowDis);
 	}
 };
 

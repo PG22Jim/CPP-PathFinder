@@ -3,8 +3,6 @@
 
 void GridTable::initializeGridTable()
 {
-    const int maxColumn = 10;
-    const int maxRow = 10;
 
     // Set start and finish with random generator
     SquareData* startData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Start);
@@ -49,6 +47,36 @@ void GridTable::initializeGridTable()
             // SquareList.push_back(newData);
 
             iterationIndex++;
+        }
+    }
+
+    initializeWalls((maxColumn * maxRow)/5);
+
+}
+
+void GridTable::initializeWalls(int wallNum)
+{
+    for (int i = 0; i < wallNum; i++)
+    {
+        bool bIsWallDecided = false;
+
+        while (!bIsWallDecided)
+        {
+            // Providing a seed value
+            srand((unsigned)time(NULL));
+
+            //
+            int rndColumn = rand() % 10;
+            int rndRow = rand() % 10;
+
+            SquareData* returnData = getSquareData(rndColumn, rndRow);
+            if (!returnData) continue;
+
+            SquareStatus returnStatus = returnData->getSquareStatus();
+            if (returnStatus != Empty) continue;
+
+            returnData->setSquareStatus(SquareStatus::Wall);
+            bIsWallDecided = true;
         }
     }
 }
@@ -96,7 +124,7 @@ SquareData* GridTable::getSquareData(int requestColumn, int requestRow)
     //return nullptr;
 }
 
-void GridTable::getPathToGoal()
+void GridTable::tryPathFinding()
 {
     openSet.clear();
     closeSet.clear();
@@ -120,6 +148,7 @@ void GridTable::getPathToGoal()
                 pathToGoal = eachNewNode;
                 removeOpenSet(pathToGoal);
                 // TODO: clear all nodes that are not goal
+
                 openSet.clear();
                 continue;
             }
@@ -135,6 +164,7 @@ void GridTable::getPathToGoal()
     }
 
 
+    allocatePathToGoal();
 }
 
 std::vector<Node*> GridTable::tryExploreNode(Node* exploringNode)
@@ -285,24 +315,52 @@ bool GridTable::canExploreThisSquare(SquareData* checkingData)
     return true;
 }
 
-Node* GridTable::findNextExploreNode()
+void GridTable::eraseAllNodeNotInPath(Node* pathNode)
 {
-    SquareKey startKey = startSquareData->getKey();
-    SquareKey goalKey = goalSquareData->getKey();
+    if (!pathNode) return;
 
-    for (Node* eachNode : openSet) 
+    // For each node in open set
+    for (Node* eachOpenNode : openSet) 
     {
-        SquareKey iterateKey = eachNode->data->getKey();
+        bool bIsPath = false;
+        bool bIterateFinish = false;
 
-        // G: distance from Node to the Start
-        const int G = iterateKey.findDistance(startKey);
+        Node* iterateNode = pathNode;
+        SquareKey eachOpenKey = eachOpenNode->data->getKey();
+        while (!bIterateFinish)
+        {
+            SquareKey iterateKey = iterateNode->data->getKey();
+            if (eachOpenKey.operator==(iterateKey))
+            {
+                bIsPath = true;
+                bIterateFinish = true;
+            }
 
-        // H: distance from Node to the Goal
-        const int H = iterateKey.findDistance(goalKey);
+            iterateNode = iterateNode->previousData;
+            if (iterateNode != nullptr)
+            {
+                bIterateFinish = true;
+            }
+        }
+        
+        if (!bIsPath) 
+        {
+            eachOpenNode == nullptr;
+        }
+    }
 
-        const int sum = G + H;
+    Node* secondIterateNode = pathNode;
+    for (Node* eachCloseNode : closeSet)
+    {
+        SquareKey eachCloseKey = eachCloseNode->data->getKey();
+        while (secondIterateNode->previousData != nullptr)
+        {
 
 
+
+
+            secondIterateNode = secondIterateNode->previousData;
+        }
     }
 
 
@@ -311,11 +369,99 @@ Node* GridTable::findNextExploreNode()
 
 
 
+}
+
+void GridTable::allocatePathToGoal()
+{
+    if (pathToGoal) 
+    {
+        Node* iterateNode = pathToGoal;
+
+        while (iterateNode)
+        {
+            SquareData* iterateData = iterateNode->data;
+            SquareStatus iterateStatus = iterateData->getSquareStatus();
+            if (iterateStatus == SquareStatus::Empty) 
+            {
+                iterateData->setSquareStatus(SquareStatus::Path);
+            }
+
+            iterateNode = iterateNode->previousData;
+        }
+    }
+}
+
+Node* GridTable::findNextExploreNode()
+{
+    int openSetSize = openSet.size();
+
+    // if there is no node in the list
+    if (openSetSize == 0) 
+    {
+        return nullptr;
+    }
+
+    // If there is only one node in the list
+    if (openSetSize == 1) 
+    {
+        return openSet.at(0);
+    }
+
+
+    // if there are more than 1 node in openSet
+    SquareKey startKey = startSquareData->getKey();
+    SquareKey goalKey = goalSquareData->getKey();
+    
+    Node* bestNode = openSet.at(0);
+    SquareKey bestNodeKey = bestNode->data->getKey();
+    // G: distance from Node to the Start
+    int bestG = bestNodeKey.findDistance(startKey);
+    // H: distance from Node to the Goal
+    int bestH = bestNodeKey.findDistance(goalKey);
+
+    int bestSum = bestG + bestH;
 
 
 
+    for (Node* eachNode : openSet) 
+    {
+        SquareKey iterateKey = eachNode->data->getKey();
 
-    return nullptr;
+        // G: distance from Node to the Start
+        const int iterateG = iterateKey.findDistance(startKey);
+        // H: distance from Node to the Goal
+        const int iterateH = iterateKey.findDistance(goalKey);
+        const int iterateSum = iterateG + iterateH;
+
+        // if sum is bigger than best sum, next iteration
+        if (iterateSum > bestSum) continue;
+
+        // if sums are same
+        else if (iterateSum == bestSum) 
+        {
+            // check if H value is smaller or not, if true, iterate node become best node
+            if (iterateH < iterateH)
+            {
+                bestNode = eachNode;
+                bestG = iterateG;
+                bestH = iterateH;
+                bestSum = iterateSum;
+            }
+        }
+        else
+        {
+            // if iterate sum is smaller than best sum, iterate node become best node
+            bestNode = eachNode;
+            bestG = iterateG;
+            bestH = iterateH;
+            bestSum = iterateSum;
+        }
+
+    }
+
+
+    return bestNode;
+
 }
 
 int GridTable::getGValue(Node* targetNode)
@@ -349,6 +495,13 @@ void GridTable::addNewCloseSet(Node* addingNode)
 
 GridTable::GridTable()
 {
+    initializeGridTable();
+}
+
+GridTable::GridTable(int column, int row)
+{
+    maxColumn = column;
+    maxRow = row;
     initializeGridTable();
 }
 

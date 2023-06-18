@@ -37,17 +37,13 @@ void drawGrid(GridTable* gridTable)
         if (status == SquareStatus::Empty)
             glColor3f(1.0f, 1.0f, 1.0f); // draw white as empty space
         else if (status == SquareStatus::Start)
-        {
-            glColor3f(0.0f, 1.0f, 0.0f); // draw green square as start
-            std::cout << " column: " << column << "  row: " << row << std::endl;
-        }
-        else if (status == SquareStatus::Goal)
-        {
-            glColor3f(0.0f, 0.0f, 1.0f); // draw blue square as goal
-            std::cout << " column: " << column << "  row: " << row << std::endl;
-        }
+            glColor3f(0.0f, 1.0f, 0.0f); // draw green as start       
+        else if (status == SquareStatus::Goal)       
+            glColor3f(0.0f, 0.0f, 1.0f); // draw blue as goal
+                else if(status == SquareStatus::Wall)
+            glColor3f(1.0f, 0.0f, 0.0f); // draw red as wall
         else
-            glColor3f(1.0f, 0.0f, 0.0f); // draw red square as wall
+            glColor3f(1.0f, 1.0f, 0.0f); // draw yellow as path
 
 
         glBegin(GL_QUADS);
@@ -58,46 +54,6 @@ void drawGrid(GridTable* gridTable)
         glEnd();
 
     }
-
-
-
-
-    //for (int a = 0; a < listSize; a++)
-    //{
-    //    SquareData* iteratingSquare = dataList.at(a);
-    //    Key iteratingKey = iteratingSquare->getKey();
-    //    int column = iteratingKey.getColumn();
-    //    int row = iteratingKey.getRow();
-    //    SquareStatus status = iteratingSquare->getSquareStatus();
-
-    //    float x = row * squareSizeX;
-    //    float y = column * squareSizeY;
-
-
-
-    //    if (status == SquareStatus::Empty)
-    //        glColor3f(1.0f, 1.0f, 1.0f); // draw white as empty space
-    //    else if (status == SquareStatus::Start)
-    //    {
-    //        glColor3f(0.0f, 1.0f, 0.0f); // draw green square as start
-    //        std::cout << " column: " << column << "  row: " << row << std::endl;
-    //    }
-    //    else if (status == SquareStatus::Goal)
-    //    {
-    //        glColor3f(0.0f, 0.0f, 1.0f); // draw blue square as goal
-    //        std::cout << " column: " << column << "  row: " << row << std::endl;
-    //    }
-    //    else
-    //        glColor3f(1.0f, 0.0f, 0.0f); // draw red square as wall
-
-
-    //    glBegin(GL_QUADS);
-    //    glVertex2f(x, y);
-    //    glVertex2f(x + squareSizeX, y);
-    //    glVertex2f(x + squareSizeX, y + squareSizeY);
-    //    glVertex2f(x, y + squareSizeY);
-    //    glEnd();
-    //}
 }
 
 int main()
@@ -114,7 +70,14 @@ int main()
 
     glfwMakeContextCurrent(window);
 
-    GridTable* gridTable = new GridTable();
+    GridTable* gridTable = new GridTable(GRID_COLUMNS, GRID_ROWS);
+
+    // if path is nullptr, call tryPathFinding function
+    if (!gridTable->getPathToGoal()) 
+    {
+        gridTable->tryPathFinding();
+    }
+
 
     glViewport(0, 0, WIDTH, HEIGHT);
     glMatrixMode(GL_PROJECTION);
