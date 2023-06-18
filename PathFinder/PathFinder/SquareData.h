@@ -2,6 +2,15 @@
 
 #include <map>
 #include <stdlib.h>
+#include "SFML/Graphics.hpp"
+
+
+const int GRID_LENGTH = 800;     // Grid Length
+const int GRID_ROWS = 10;   // Number of grid rows
+const int GRID_COLUMNS = 10; // Number of grid columns
+const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
+const float SQUARE_OUTLINE_THICKNESS = 3.0f;
+
 
 enum SquareStatus
 {
@@ -61,20 +70,29 @@ private:
 	SquareKey squareKey;
 	SquareStatus squareStatus;
 
+	sf::RectangleShape squareShape;
+
+	void initializeShape(SquareKey key);
+
+
 public:
-	// Getters and setters for Key
+	//const int getPositionValue(bool isColumn);
+	
+	// Getters and setters
 	const SquareKey& getKey() const { return squareKey; }
 	void setKey(const SquareKey& newKey) { squareKey = newKey; }
 
-	const int getPositionValue(bool isColumn);
-
-
-	// Getters and setters for SquareStatus
 	SquareStatus getSquareStatus() const { return squareStatus; }
 	void setSquareStatus(SquareStatus newStatus) { squareStatus = newStatus; }
 
 
+	// Public function to be called from other class
+	void updateRectShapeColor(sf::Color color);
 
+	sf::RectangleShape getShape() { return squareShape; }
+
+
+	// Constructors and Destructor
 	SquareData();
 	SquareData(int column, int row, SquareStatus status);
 	SquareData(const SquareData& other);

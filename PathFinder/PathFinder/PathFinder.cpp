@@ -3,17 +3,12 @@
 
 #include <iostream>
 //#include <GLFW/glfw3.h>
-#include "GridTable.h"
+#include "GridManager.h"
 
-#include "SFML/Graphics.hpp"
 
 const int WIDTH = 1200;      // Window width
 const int HEIGHT = 900;     // Window height
-const int GRID_LENGTH = 800;     // Grid Length
-const int GRID_ROWS = 10;   // Number of grid rows
-const int GRID_COLUMNS = 10; // Number of grid columns
-const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
-const float SQUARE_OUTLINE_THICKNESS = 3.0f;
+
 
 const std::string PATHFOUND_MESSAGE = " Path Found!! ";
 
@@ -36,42 +31,17 @@ int main()
     sf::Event event;
 
     // Create grid table
-    GridTable* gridTable = new GridTable(GRID_COLUMNS, GRID_ROWS);
 
-    // if path is nullptr, call tryPathFinding function
-    if (!gridTable->getPathToGoal()) 
-    {
-        gridTable->tryPathFinding();
-    }
+    GridManager* gridManager = new GridManager(GRID_COLUMNS, GRID_ROWS);
+    GridTable* gridTable = gridManager->getGridTable();
+
+    //// if path is nullptr, call tryPathFinding function
+    //if (!gridTable->getPathToGoal()) 
+    //{
+    //    ErrorType resultError = gridTable->tryPathFinding();
+    //}
 
 
-    sf::RectangleShape rects[GRID_ROWS * GRID_COLUMNS];
-    int index = 0;
-    for(const auto& eachMapObject : gridTable->gridData)
-    {
-        SquareKey eachKey = eachMapObject.first;
-        SquareStatus eachStatus = eachMapObject.second->getSquareStatus();
-        sf::Vector2f rectanglePos(getPosition(eachKey));
-
-        rects[index].setPosition(rectanglePos);
-        rects[index].setSize(sf::Vector2f(SQUARE_SIZE, SQUARE_SIZE));
-
-        if(eachStatus == Empty)
-            rects[index].setFillColor(sf::Color::Yellow);
-        else if (eachStatus == Wall)
-            rects[index].setFillColor(sf::Color::Red);
-        else if (eachStatus == Start)
-            rects[index].setFillColor(sf::Color::Green);
-        else if (eachStatus == Goal)
-            rects[index].setFillColor(sf::Color::Blue);
-        else
-            rects[index].setFillColor(sf::Color::Cyan);
-
-        rects[index].setOutlineColor(sf::Color::Black);
-        rects[index].setOutlineThickness(SQUARE_OUTLINE_THICKNESS);
-
-        index++;
-    }
 
     sf::RectangleShape backGround;
     backGround.setPosition(sf::Vector2f(0, 0));
@@ -95,8 +65,10 @@ int main()
                     // Print mouse position if mouse cursor position is in grid
                     if (GRID_LENGTH > mousePosition.x && GRID_LENGTH > mousePosition.y)
                     {
+                        const int X = static_cast<int>(mousePosition.x / SQUARE_SIZE);
+                        const int Y = static_cast<int>(mousePosition.y / SQUARE_SIZE);
 
-                        std::cout << "Mouse Position: " << mousePosition.x << ", " << mousePosition.y << std::endl;
+                        std::cout << "Mouse Position: X: " << X << ", Y: " << Y << std::endl;
                     }
                 }
             }
@@ -113,9 +85,26 @@ int main()
         // draw background
         window.draw(backGround);
 
-        for (sf::RectangleShape eachRect : rects)
+        // Draw grid
+        for (const auto& eachMapObject : gridTable->gridData)
         {
-            window.draw(eachRect);
+            SquareData* eachData = eachMapObject.second;
+            SquareKey eachKey = eachMapObject.first;
+            SquareStatus eachStatus = eachData->getSquareStatus();
+
+
+            if (eachStatus == Empty)
+                eachData->updateRectShapeColor(sf::Color::Yellow);
+            else if (eachStatus == Wall)
+                eachData->updateRectShapeColor(sf::Color::Red);
+            else if (eachStatus == Start)
+                eachData->updateRectShapeColor(sf::Color::Green);
+            else if (eachStatus == Goal)
+                eachData->updateRectShapeColor(sf::Color::Blue);
+            else
+                eachData->updateRectShapeColor(sf::Color::Cyan);
+
+            window.draw(eachData->getShape());
         }
 
         // display window

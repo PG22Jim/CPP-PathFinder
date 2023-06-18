@@ -5,6 +5,19 @@
 #include "Node.h"
 #include "SquareData.h"
 
+
+
+enum ErrorType
+{
+	MissingStartGoal,
+	NoValidPath,
+	None
+};
+
+
+
+
+
 class GridTable
 {
 private:
@@ -21,6 +34,7 @@ private:
 
 	int maxColumn = 10;
 	int maxRow = 10;
+
 
 
 	Node* pathToGoal = nullptr;
@@ -69,7 +83,7 @@ public:
 
 	Node* getPathToGoal() const { return pathToGoal; }
 	
-	void tryPathFinding();
+	ErrorType tryPathFinding();
 
 	GridTable();
 	GridTable(int column, int row);

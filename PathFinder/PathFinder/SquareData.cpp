@@ -1,30 +1,48 @@
 #include "SquareData.h"
 
-const int SquareData::getPositionValue(bool isColumn)
+void SquareData::initializeShape(SquareKey key)
 {
-	if (isColumn)
-		return squareKey.getColumn();
+    const int x = SQUARE_SIZE * key.getRow();
+    const int y = SQUARE_SIZE * key.getColumn();
 
-	return squareKey.getRow();
+    squareShape.setPosition(sf::Vector2f(x, y));
+    squareShape.setSize(sf::Vector2f(SQUARE_SIZE, SQUARE_SIZE));
+
+	squareShape.setOutlineColor(sf::Color::Black);
+	squareShape.setOutlineThickness(SQUARE_OUTLINE_THICKNESS);
+}
+
+//const int SquareData::getPositionValue(bool isColumn)
+//{
+//	if (isColumn)
+//		return squareKey.getColumn();
+//
+//	return squareKey.getRow();
+//}
+
+void SquareData::updateRectShapeColor(sf::Color color)
+{
+	squareShape.setFillColor(color);
 }
 
 SquareData::SquareData()
 {
 	squareKey = SquareKey();
+	initializeShape(squareKey);
 	squareStatus = ::Empty;
 }
 
 SquareData::SquareData(int column, int row, SquareStatus status)
 {
-	squareKey = SquareKey();
-	squareKey.setColumn(column);
-	squareKey.setRow(row);
+	squareKey = SquareKey(column, row);
+	initializeShape(squareKey);
 	squareStatus = status;
 }
 
 SquareData::SquareData(const SquareData& other)
 {
 	squareKey = other.getKey();
+	initializeShape(squareKey);
 	squareStatus = other.squareStatus;
 }
 

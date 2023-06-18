@@ -3,24 +3,23 @@
 
 void GridTable::initializeGridTable()
 {
+    //// Set start and finish with random generator
+    //SquareData* startData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Start);
+    //SquareData* goalData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Goal);
 
-    // Set start and finish with random generator
-    SquareData* startData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Start);
-    SquareData* goalData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Goal);
+    //bool isGoalDecided = false;
 
-    bool isGoalDecided = false;
+    //while (!isGoalDecided)
+    //{
+    //    // if start position is different from goal position, set bool to true to stop while loop and continue
+    //    if (!squareCompare_IsSamePos(goalData, startData))
+    //    {
+    //        isGoalDecided = true;
+    //        continue;
+    //    }
 
-    while (!isGoalDecided)
-    {
-        // if start position is different from goal position, set bool to true to stop while loop and continue
-        if (!squareCompare_IsSamePos(goalData, startData))
-        {
-            isGoalDecided = true;
-            continue;
-        }
-
-        goalData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Goal);
-    }
+    //    goalData = generateRandomSquare(maxColumn, maxRow, SquareStatus::Goal);
+    //}
 
     // Nested for loop to initialize square data
     int iterationIndex = 0;
@@ -30,16 +29,16 @@ void GridTable::initializeGridTable()
         {
             SquareData* newData = new SquareData(j, i, Empty);
 
-            if (squareCompare_IsSamePos(newData, startData))
-            {
-                startSquareData = newData;
-                startSquareData->setSquareStatus(SquareStatus::Start);
-            }
-            else if (squareCompare_IsSamePos(newData, goalData))
-            {
-                goalSquareData = newData;
-                goalSquareData->setSquareStatus(SquareStatus::Goal);
-            }
+            //if (squareCompare_IsSamePos(newData, startData))
+            //{
+            //    startSquareData = newData;
+            //    startSquareData->setSquareStatus(SquareStatus::Start);
+            //}
+            //else if (squareCompare_IsSamePos(newData, goalData))
+            //{
+            //    goalSquareData = newData;
+            //    goalSquareData->setSquareStatus(SquareStatus::Goal);
+            //}
             
             //gridData[newData->getKey()] = newData;
             SquareKey newDataKey = newData->getKey();
@@ -50,7 +49,7 @@ void GridTable::initializeGridTable()
         }
     }
 
-    initializeWalls((maxColumn * maxRow)/10);
+    //initializeWalls((maxColumn * maxRow)/10);
 }
 
 void GridTable::initializeWalls(int wallNum)
@@ -107,26 +106,17 @@ SquareData* GridTable::getSquareData(int requestColumn, int requestRow)
         return foundObject->second;
     else
         return nullptr;
-
-    //for (int i = 0; i < squareListSize; ++i)
-    //{
-    //    Key iteratingKey = SquareList.at(i)->getKey();
-    //    int column = iteratingKey.getColumn();
-    //    int row = iteratingKey.getRow();
-
-    //    if (column == requestColumn && row == requestRow)
-    //    {
-    //        return SquareList[i];
-    //    }
-    //}
-
-    //return nullptr;
 }
 
-void GridTable::tryPathFinding()
+ErrorType GridTable::tryPathFinding()
 {
+    if (!startSquareData || !goalSquareData) return ErrorType::MissingStartGoal;
+
+
     openSet.clear();
     closeSet.clear();
+
+
 
     Node* currentNode = new Node(startSquareData);
     addNewOpenSet(currentNode);
@@ -136,34 +126,35 @@ void GridTable::tryPathFinding()
         // Explore iterating node and update other possible exploring node into open set
         std::vector<Node*> newExplorableNodes = tryExploreNode(currentNode);
 
-        // Check if new return new Explorable Nodes has node that is goal
-        for (Node* eachNewNode : newExplorableNodes)
-        {
-            // If status is goal
-            SquareStatus eachStatus = eachNewNode->data->getSquareStatus();
-            if (eachStatus == SquareStatus::Goal) 
+        if(newExplorableNodes.size() > 0)
+            // Check if new return new Explorable Nodes has node that is goal
+            for (Node* eachNewNode : newExplorableNodes)
             {
-                // assign it as pathToGoal, remove from openSet, then clear openSet
-                pathToGoal = eachNewNode;
-                removeOpenSet(pathToGoal);
-                // TODO: clear all nodes that are not goal
-
-                openSet.clear();
-                continue;
+                // If status is goal
+                SquareStatus eachStatus = eachNewNode->data->getSquareStatus();
+                if (eachStatus == SquareStatus::Goal) 
+                {
+                    // assign it as pathToGoal, remove from openSet, then clear openSet
+                    pathToGoal = eachNewNode;
+                    removeOpenSet(pathToGoal);
+                    // TODO: clear all nodes that are not goal
+                    allocatePathToGoal();
+                    openSet.clear();
+                    return ErrorType::None;
+                }
             }
-        }
 
-
+        // get next exploring node from openset
         Node* nextExploreNode = findNextExploreNode();
         if (nextExploreNode) 
         {
+            // if nextExploreNode valid, continue to explore
             currentNode = nextExploreNode;
         }
-
     }
 
-
-    allocatePathToGoal();
+    // if openset is empty, all possible squares are explored. return Error NoValidPath
+    return ErrorType::NoValidPath;
 }
 
 std::vector<Node*> GridTable::tryExploreNode(Node* exploringNode)
@@ -394,13 +385,13 @@ Node* GridTable::findNextExploreNode()
 {
     int openSetSize = openSet.size();
 
-    // if there is no node in the list
+    // if there is no node in openset
     if (openSetSize == 0) 
     {
         return nullptr;
     }
 
-    // If there is only one node in the list
+    // If there is only one node in openset, just return that
     if (openSetSize == 1) 
     {
         return openSet.at(0);
@@ -419,7 +410,6 @@ Node* GridTable::findNextExploreNode()
     int bestH = bestNodeKey.findDistance(goalKey);
 
     int bestSum = bestG + bestH;
-
 
 
     for (Node* eachNode : openSet) 
@@ -455,12 +445,8 @@ Node* GridTable::findNextExploreNode()
             bestH = iterateH;
             bestSum = iterateSum;
         }
-
     }
-
-
     return bestNode;
-
 }
 
 int GridTable::getGValue(Node* targetNode)
