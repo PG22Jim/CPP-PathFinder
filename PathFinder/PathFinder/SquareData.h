@@ -6,9 +6,9 @@
 #include <iostream>
 
 
-const int GRID_LENGTH = 800;     // Grid Length
-const int GRID_ROWS = 10;   // Number of grid rows
-const int GRID_COLUMNS = 10; // Number of grid columns
+const int GRID_LENGTH = 600;     // Grid Length
+const int GRID_ROWS = 20;   // Number of grid rows
+const int GRID_COLUMNS = 20; // Number of grid columns
 const int PADDING = 40;
 const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
 const float SQUARE_OUTLINE_THICKNESS = 3.0f;
@@ -88,7 +88,7 @@ public:
 	
 	// Getters and setters
 	const SquareKey& getKey() { return squareKey; }
-	const SquareKey& getKey() const { return squareKey; }
+	const SquareKey& getKey_const() const { return squareKey; }
 	void setKey(const SquareKey& newKey) { squareKey = newKey; }
 
 	SquareStatus getSquareStatus() const { return squareStatus; }

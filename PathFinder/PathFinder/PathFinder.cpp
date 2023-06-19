@@ -146,50 +146,5 @@ int main()
 
     }
 
-
     return 0;
-
-
-    //if (!glfwInit())
-    //    return -1;
-
-    //GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Path Finder", NULL, NULL);
-    //if (!window)
-    //{
-    //    glfwTerminate();
-    //    return -1;
-    //}
-
-    //glfwMakeContextCurrent(window);
-
-    //GridTable* gridTable = new GridTable(GRID_COLUMNS, GRID_ROWS);
-
-    //// if path is nullptr, call tryPathFinding function
-    //if (!gridTable->getPathToGoal()) 
-    //{
-    //    gridTable->tryPathFinding();
-    //}
-
-
-    //glViewport(0, 0, WIDTH, HEIGHT);
-    //glMatrixMode(GL_PROJECTION);
-    //glLoadIdentity();
-    //glOrtho(0, WIDTH, HEIGHT, 0, -1, 1);
-    //glMatrixMode(GL_MODELVIEW);
-    //glLoadIdentity();
-
-    //while (!glfwWindowShouldClose(window))
-    //{
-    //    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set clear color to white
-    //    glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
-
-
-    //    drawGrid(gridTable);
-
-    //    glfwSwapBuffers(window);
-    //    glfwPollEvents();
-    //}
-
-    //glfwTerminate();
-    //return 0;
 }

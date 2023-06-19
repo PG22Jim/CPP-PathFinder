@@ -20,7 +20,10 @@ public:
 
 	int getSum() const { return gCost + hCost; }
 	int getGCost() const { return gCost; }
+	int getHCost() const { return hCost; }
 	void setGCost(int newG) { gCost = newG; }
+	void setHCost(int newH) { hCost = newH; }
+
 
 	SquareData* getSquareData() const { return data; }
 

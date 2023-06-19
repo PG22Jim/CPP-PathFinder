@@ -23,16 +23,16 @@ enum ErrorType
 class GridTable
 {
 private:
-
-	// Private variables
-	int squareListSize = 100;
 	
 	SquareData* startSquareData = nullptr;
 	SquareData* goalSquareData = nullptr;
 
 	//std::vector<SquareData*> SquareList;
-	std::vector<Node*> openSet;
-	std::vector<Node*> closeSet;
+	//std::vector<Node*> openSet;
+	//std::vector<Node*> closeSet;
+	std::map<SquareKey, Node*> openSet;
+	std::map<SquareKey, Node*> closeSet;
+
 
 	int maxColumn = 10;
 	int maxRow = 10;
@@ -55,17 +55,17 @@ private:
 
 
 
+
 	std::vector<Node*> getValidNeighborNodes(Node* exploringNode);
 
 	Node* tryExploreNode(int requestColumn, int requestRow, Node* originalNode);
 
-	Node* getCorrectParentNode(Node* exploredNode);
-
-	Node* getRequestNodeFromOpenSet(const SquareKey& requestingKey);
+	Node* getUpdatedCostNode(SquareData* checkingSquareData, Node* currentExploredNode);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
 
-	void eraseAllNodeNotInPath();
+
+
 
 	void allocatePathToGoal();
 
@@ -88,6 +88,7 @@ public:
 	// Get set functions
 	Node* getPathToGoal() const { return pathToGoal; }
 	void clearExistingPath();
+	void eraseAllNode();
 
 
 	SquareData* getSquareData(int requestColumn, int requestRow);
@@ -99,6 +100,9 @@ public:
 	void setGoalSquareData(SquareData* newData) { goalSquareData = newData; }
 
 	void swapSquareStatus(SquareData* squareA, SquareData* squareB);
+
+	void clearOpenSet();
+	void clearCloseSet();
 
 	bool isAbleToAddMoreWall() const { return currentWallNum + 1 <= maxWallNum; }
 	void currentWallNumIncrement() { currentWallNum++; }

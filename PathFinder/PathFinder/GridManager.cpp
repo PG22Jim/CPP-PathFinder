@@ -9,12 +9,19 @@ void GridManager::onUpdatePath()
 {
     // If there is any showing path
     if (gridTable->getPathToGoal())
-        // clear path
+    {
+        // clear path openset, closeset, and pathNode
+        gridTable->eraseAllNode();
         gridTable->clearExistingPath();
-    
+    }
 
     // update Path
     gridTable->tryPathFinding();
+}
+
+bool GridManager::isAbleTryPathFind()
+{
+    return (gridTable->getStartSquareData()) && (gridTable->getGoalSquareData());
 }
 
 GridTable* GridManager::getGridTable()
@@ -27,8 +34,11 @@ void GridManager::onClearExistPath()
 
     // If there is any showing path
     if (gridTable->getPathToGoal())
+    {
         // clear path
         gridTable->clearExistingPath();
+
+    }
 }
 
 bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus)
@@ -260,7 +270,16 @@ void GridManager::OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::But
             const int mouseRow = mousePos.x / SQUARE_SIZE;
             const int mouseColumn = mousePos.y / SQUARE_SIZE;
 
-            OnChangeSquare(mouseColumn, mouseRow, currentRequestStatus);
+
+            if (OnChangeSquare(mouseColumn, mouseRow, currentRequestStatus)) 
+            {
+                if (isAbleTryPathFind() && gridTable->getPathToGoal())
+                {
+                    onUpdatePath();
+                }
+            }
+
+
         }
     }
 
@@ -275,7 +294,14 @@ void GridManager::OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::But
             const int mouseColumn = mousePos.y / SQUARE_SIZE;
 
             // Right click means removing square
-            OnChangeSquare(mouseColumn, mouseRow, Empty);
+            if (OnChangeSquare(mouseColumn, mouseRow, Empty))
+            {
+                if (isAbleTryPathFind() && gridTable->getPathToGoal())
+                {
+                    onUpdatePath();
+                }
+            }
+
         }
     }
 }

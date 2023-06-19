@@ -41,7 +41,7 @@ SquareData::SquareData(int column, int row, SquareStatus status)
 
 SquareData::SquareData(const SquareData& other)
 {
-	squareKey = other.getKey();
+	squareKey = other.getKey_const();
 	initializeShape(squareKey);
 	squareStatus = other.squareStatus;
 }
