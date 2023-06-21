@@ -9,7 +9,10 @@
 const int GRID_LENGTH = 600;     // Grid Length
 const int GRID_ROWS = 20;   // Number of grid rows
 const int GRID_COLUMNS = 20; // Number of grid columns
+const int DISTANCE_DIAGONAL = 14;
+const int DISTANCE_STRAIGHT = 10;
 const int PADDING = 40;
+
 const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
 const float SQUARE_OUTLINE_THICKNESS = 3.0f;
 
@@ -24,8 +27,8 @@ enum SquareStatus
 	Start,
 	Goal,
 	Path,
-	OpenSet,
-	CloseSet,
+	CalculatedPlace,
+	CloseSet
 };
 
 // Custom key type made by column and row, it is for hash table
@@ -64,9 +67,16 @@ public:
 
 	int findDistance(const SquareKey& targetKey) const
 	{
+		// DIAGONAL DISTANCE
+		//int dx = abs(row - targetKey.getRow());
+		//int dy = abs(column - targetKey.getColumn());
+		//return DISTANCE_STRAIGHT * (dx + dy) + (DISTANCE_DIAGONAL - 2 * DISTANCE_STRAIGHT) * std::min(dx, dy);
+
+
+		// MANHATTAN DISTANCE
 		int columnDis = targetKey.getColumn() - column;
 		int rowDis = targetKey.getRow() - row;
-		int returnSum = abs(columnDis) + abs(rowDis);
+		int returnSum = DISTANCE_STRAIGHT * (abs(columnDis) + abs(rowDis));
 		return returnSum;
 	}
 };

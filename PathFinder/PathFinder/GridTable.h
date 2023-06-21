@@ -4,6 +4,8 @@
 #include <iostream>
 #include "Node.h"
 #include "SquareData.h"
+#include <map>
+#include <algorithm>
 
 
 
@@ -54,13 +56,7 @@ private:
 	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
 
 
-
-
 	std::vector<Node*> getValidNeighborNodes(Node* exploringNode);
-
-	Node* tryExploreNode(int requestColumn, int requestRow, Node* originalNode);
-
-	Node* getUpdatedCostNode(SquareData* checkingSquareData, Node* currentExploredNode);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
 
@@ -82,7 +78,7 @@ private:
 
 public:
 
-	std::map<SquareKey, SquareData*> gridData;
+	std::map<SquareKey, Node*> gridData;
 	
 	
 	// Get set functions
@@ -92,6 +88,7 @@ public:
 
 
 	SquareData* getSquareData(int requestColumn, int requestRow);
+	Node* tryGetGridFromTable(int requestColumn, int requestRow);
 
 	SquareData* getStartSquareData() const { return startSquareData; }
 	void setStartSquareData(SquareData* newData) { startSquareData = newData; }

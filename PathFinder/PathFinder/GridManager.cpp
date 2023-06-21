@@ -43,6 +43,8 @@ void GridManager::onClearExistPath()
 
 bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus)
 {
+    currentError = None;
+
     // Get suare data from grid table, if result is nullptr, no result
     SquareData* accessingSquareData = gridTable->getSquareData(column, row);
     if (!accessingSquareData) return false;
@@ -57,10 +59,10 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
         // if user request accessing square to be Empty
         case Empty:
             // if accessing square is empty, no need to access it
-            if (accessingSquareStatus == Empty) return true;
+            if ((accessingSquareStatus == SquareStatus::Empty) || (accessingSquareStatus == SquareStatus::Path) || (accessingSquareStatus == CalculatedPlace)) return false;
 
             // if accessing square is start or goal, make the reference as nullptr and change status
-            else if (accessingSquareStatus == Start) 
+            if (accessingSquareStatus == Start) 
             {
                 gridTable->setStartSquareData(nullptr);
                 accessingSquareData->setSquareStatus(Empty);
@@ -84,12 +86,12 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
 
         case Wall:
             // if accessing square is wall, no need to access it
-            if (accessingSquareStatus == Wall) return true;
+            if (accessingSquareStatus == Wall) return false;
             
             if (gridTable->isAbleToAddMoreWall())
             {
                 // if accessing square is empty, adding wall and current wall num increment
-                if (accessingSquareStatus == Empty)
+                if (accessingSquareStatus == Empty || accessingSquareStatus == CalculatedPlace)
                 {
                     accessingSquareData->setSquareStatus(Wall);
                     gridTable->currentWallNumDecrement();
@@ -108,6 +110,11 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
                     accessingSquareData->setSquareStatus(Wall);
                     return true;
                 }
+                else if (accessingSquareStatus == Path)
+                {
+                    accessingSquareData->setSquareStatus(Wall);
+                    return true;
+                }
             }
             else 
             {
@@ -119,10 +126,10 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
         case Start:
             // if accessing square is start, no need to access it
             if (accessingSquareStatus == Start)
-                return true;
+                return false;
 
             // if accessing square is empty, goal or wall, check if there already has startSquare
-            if (accessingSquareStatus == Empty) 
+            if (accessingSquareStatus == Empty || accessingSquareStatus == CalculatedPlace || accessingSquareStatus == Path)
             {
                 if (startData)
                 {
@@ -184,10 +191,10 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
         case Goal:
             // if accessing square is goal, no need to access it
             if (accessingSquareStatus == Goal)
-                return true;
+                return false;
 
             // if accessing square is empty, goal or wall, check if there already has goalSquare
-            if (accessingSquareStatus == Empty)
+            if (accessingSquareStatus == Empty || accessingSquareStatus == CalculatedPlace || accessingSquareStatus == Path)
             {
                 if (goalData)
                 {

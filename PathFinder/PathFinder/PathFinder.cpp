@@ -115,7 +115,7 @@ int main()
         // Draw grid
         for (const auto& eachMapObject : gridTable->gridData)
         {
-            SquareData* eachData = eachMapObject.second;
+            SquareData* eachData = eachMapObject.second->getSquareData();
             SquareKey eachKey = eachMapObject.first;
             SquareStatus eachStatus = eachData->getSquareStatus();
 
@@ -128,13 +128,13 @@ int main()
                 eachData->updateRectShapeColor(sf::Color::Green);
             else if (eachStatus == Goal)
                 eachData->updateRectShapeColor(sf::Color::Blue);
+            else if (eachStatus == CalculatedPlace)
+                eachData->updateRectShapeColor(sf::Color::Cyan);
             else if (eachStatus == CloseSet)
-                eachData->updateRectShapeColor(PURPLE);
-            else if (eachStatus == OpenSet)
                 eachData->updateRectShapeColor(ORANGE);
             else
             {
-                eachData->updateRectShapeColor(sf::Color::Cyan);
+                eachData->updateRectShapeColor(PURPLE);
             }
 
             window.draw(eachData->getShape());

@@ -13,3 +13,10 @@ int Node::calculatePathSteps()
     }
     return iterateNodeStep;
 }
+
+void Node::resetNode()
+{
+    gCost = 99;
+    hCost = 99;
+    parentNode = nullptr;
+}

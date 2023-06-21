@@ -23,6 +23,7 @@ public:
 	int getHCost() const { return hCost; }
 	void setGCost(int newG) { gCost = newG; }
 	void setHCost(int newH) { hCost = newH; }
+	void resetNode();
 
 
 	SquareData* getSquareData() const { return data; }
@@ -33,8 +34,8 @@ public:
 	Node(SquareData* storingData)
 	{
 		data = storingData;
-		gCost = 0;
-		hCost = 0;
+		gCost = 99;
+		hCost = 99;
 		parentNode = nullptr;
 	}
 
@@ -46,7 +47,7 @@ public:
 
 		hCost = h;
 
-		if (parentNode) gCost = parentNode->getGCost() + 1;
+		if (parentNode) gCost = parentNode->getGCost() + storingData->getKey().findDistance(parentNode->getSquareData()->getKey());
 		else gCost = 0;
 ;
 	}
