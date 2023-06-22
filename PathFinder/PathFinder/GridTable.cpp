@@ -130,7 +130,7 @@ void GridTable::swapSquareStatus(SquareData* squareA, SquareData* squareB)
     squareB->setSquareStatus(statusA);
 }
 
-ErrorType GridTable::tryPathFinding()
+ErrorType GridTable::tryPathFinding(GridMovement requestingMovement)
 {
     if (!startSquareData || !goalSquareData) return ErrorType::MissingStartGoal;
     pathToGoal = nullptr;
@@ -139,10 +139,11 @@ ErrorType GridTable::tryPathFinding()
     eraseAllNode();
     clearExistingPath();
 
+
     // add new created start Node into openset
     SquareKey currentStartSquareKey = startSquareData->getKey();
-    int startHCost = currentStartSquareKey.findDistance(goalSquareData->getKey());
-    addNewOpenSet(new Node(startSquareData, nullptr, startHCost));
+    int startHCost = currentStartSquareKey.findDistance(goalSquareData->getKey(), requestingMovement);
+    addNewOpenSet(new Node(startSquareData, nullptr, startHCost, requestingMovement));
 
     // iteration begin
     while (!openSet.empty())
@@ -167,20 +168,20 @@ ErrorType GridTable::tryPathFinding()
             }
 
             // find all walkable neighbors around nextExploreNode
-            std::vector<Node*> successorNodes = getValidNeighborNodes(nextExploreNode);
+            std::vector<Node*> successorNodes = getValidNeighborNodes(nextExploreNode, requestingMovement);
             //std::vector<SquareData*> validNeighbors = getValidNeighborNodes(nextExploreNode);
 
             for (Node* eachNeighbor : successorNodes)
             {
                 SquareKey neighborKey = eachNeighbor->getSquareData()->getKey();
-                int tentativeGCost = nextExploreNode->getGCost() + neighborKey.findDistance(nextExploreNode->getSquareData()->getKey());
+                int tentativeGCost = nextExploreNode->getGCost() + neighborKey.findDistance(nextExploreNode->getSquareData()->getKey(), requestingMovement);
                 auto foundItem = openSet.find(neighborKey);
                 const bool bItemFound = foundItem != openSet.end();
 
                 if (tentativeGCost < eachNeighbor->getGCost() || !bItemFound)
                 {
                     eachNeighbor->setGCost(tentativeGCost);
-                    eachNeighbor->setHCost(eachNeighbor->getSquareData()->getKey().findDistance(goalSquareData->getKey()));
+                    eachNeighbor->setHCost(eachNeighbor->getSquareData()->getKey().findDistance(goalSquareData->getKey(), requestingMovement));
                     eachNeighbor->setParentNode(nextExploreNode);
 
                     if (!bItemFound) 
@@ -197,7 +198,7 @@ ErrorType GridTable::tryPathFinding()
     return ErrorType::NoValidPath;
 }
 
-std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
+std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode, GridMovement requestingGridMovement)
 {
     std::vector<Node*> returnVector;
 
@@ -205,10 +206,6 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
     SquareKey exploringKey = exploringSquareData->getKey();
     int exploreColumn = exploringKey.getColumn();
     int exploreRow = exploringKey.getRow();
-
-
-
-
 
 
     Node* upNode = tryGetGridFromTable((exploreColumn - 1), exploreRow);
@@ -220,23 +217,6 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
         }
     }
 
-    //Node* upleftNode = tryGetGridFromTable((exploreColumn - 1), exploreRow -1);
-    //if (upleftNode)
-    //{
-    //    if (canExploreThisSquare(upleftNode->getSquareData()))
-    //    {
-    //        returnVector.push_back(upleftNode);
-    //    }
-    //}
-
-    //Node* uprightNode = tryGetGridFromTable((exploreColumn - 1), exploreRow + 1);
-    //if (uprightNode)
-    //{
-    //    if (canExploreThisSquare(uprightNode->getSquareData()))
-    //    {
-    //        returnVector.push_back(uprightNode);
-    //    }
-    //}
 
     Node* downNode = tryGetGridFromTable((exploreColumn + 1), exploreRow);
     if (downNode)
@@ -246,24 +226,6 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
             returnVector.push_back(downNode);
         }
     }
-
-    //Node* downleftNode = tryGetGridFromTable((exploreColumn + 1), exploreRow -1);
-    //if (downleftNode)
-    //{
-    //    if (canExploreThisSquare(downleftNode->getSquareData()))
-    //    {
-    //        returnVector.push_back(downleftNode);
-    //    }
-    //}
-
-    //Node* downrightNode = tryGetGridFromTable((exploreColumn + 1), exploreRow + 1);
-    //if (downleftNode)
-    //{
-    //    if (canExploreThisSquare(downrightNode->getSquareData()))
-    //    {
-    //        returnVector.push_back(downrightNode);
-    //    }
-    //}
 
     Node* leftNode = tryGetGridFromTable(exploreColumn, exploreRow - 1);
     if (leftNode)
@@ -282,6 +244,47 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode)
             returnVector.push_back(rightNode);
         }
     }
+
+    if (requestingGridMovement == DiagonalAlso)
+    {
+        Node* upleftNode = tryGetGridFromTable((exploreColumn - 1), exploreRow -1);
+        if (upleftNode)
+        {
+            if (canExploreThisSquare(upleftNode->getSquareData()))
+            {
+                returnVector.push_back(upleftNode);
+            }
+        }
+
+        Node* uprightNode = tryGetGridFromTable((exploreColumn - 1), exploreRow + 1);
+        if (uprightNode)
+        {
+            if (canExploreThisSquare(uprightNode->getSquareData()))
+            {
+                returnVector.push_back(uprightNode);
+            }
+        }
+    
+        Node* downleftNode = tryGetGridFromTable((exploreColumn + 1), exploreRow -1);
+        if (downleftNode)
+        {
+            if (canExploreThisSquare(downleftNode->getSquareData()))
+            {
+                returnVector.push_back(downleftNode);
+            }
+        }
+
+        Node* downrightNode = tryGetGridFromTable((exploreColumn + 1), exploreRow + 1);
+        if (downleftNode)
+        {
+            if (canExploreThisSquare(downrightNode->getSquareData()))
+            {
+                returnVector.push_back(downrightNode);
+            }
+        }    
+    }
+
+
 
     return returnVector;
 }
@@ -374,7 +377,7 @@ void GridTable::allocatePathToGoal()
         SquareStatus iterateStatus = iterateData->getSquareStatus();
         if (iterateStatus == SquareStatus::Empty)
         {
-            iterateData->setSquareStatus(SquareStatus::CloseSet);
+            iterateData->setSquareStatus(SquareStatus::CalculatedPlace);
         }
     }
 

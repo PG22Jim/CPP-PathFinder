@@ -44,6 +44,8 @@ private:
 
 
 
+
+
 	Node* pathToGoal = nullptr;
 
 
@@ -56,7 +58,7 @@ private:
 	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
 
 
-	std::vector<Node*> getValidNeighborNodes(Node* exploringNode);
+	std::vector<Node*> getValidNeighborNodes(Node* exploringNode, GridMovement requestingGridMovement);
 
 	bool canExploreThisSquare(SquareData* checkingNode);
 
@@ -105,7 +107,7 @@ public:
 	void currentWallNumIncrement() { currentWallNum++; }
 	void currentWallNumDecrement() { currentWallNum--; }
 	
-	ErrorType tryPathFinding();
+	ErrorType tryPathFinding(GridMovement requestingMovement);
 
 	GridTable();
 	GridTable(int column, int row);

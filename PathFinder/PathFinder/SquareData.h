@@ -20,6 +20,15 @@ const float SQUARE_OUTLINE_THICKNESS = 3.0f;
 const sf::Color ORANGE = sf::Color(255, 127, 0);
 const sf::Color PURPLE = sf::Color(127, 0, 255);
 
+
+
+enum GridMovement 
+{
+	NeighborOnly,
+	DiagonalAlso
+};
+
+
 enum SquareStatus
 {
 	Empty,
@@ -28,7 +37,6 @@ enum SquareStatus
 	Goal,
 	Path,
 	CalculatedPlace,
-	CloseSet
 };
 
 // Custom key type made by column and row, it is for hash table
@@ -65,13 +73,15 @@ public:
 			return false;
 	}
 
-	int findDistance(const SquareKey& targetKey) const
+	int findDistance(const SquareKey& targetKey, GridMovement requestMovement) const
 	{
 		// DIAGONAL DISTANCE
-		//int dx = abs(row - targetKey.getRow());
-		//int dy = abs(column - targetKey.getColumn());
-		//return DISTANCE_STRAIGHT * (dx + dy) + (DISTANCE_DIAGONAL - 2 * DISTANCE_STRAIGHT) * std::min(dx, dy);
-
+		if (requestMovement == DiagonalAlso)
+		{
+			int dx = abs(row - targetKey.getRow());
+			int dy = abs(column - targetKey.getColumn());
+			return DISTANCE_STRAIGHT * (dx + dy) + (DISTANCE_DIAGONAL - 2 * DISTANCE_STRAIGHT) * std::min(dx, dy);
+		}
 
 		// MANHATTAN DISTANCE
 		int columnDis = targetKey.getColumn() - column;

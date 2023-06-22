@@ -40,14 +40,14 @@ public:
 	}
 
 
-	Node(SquareData* storingData, Node* storingPreviousData, int h)
+	Node(SquareData* storingData, Node* storingPreviousData, int h, GridMovement requestingGridMovement)
 	{
 		data = storingData;
 		parentNode = storingPreviousData;
 
 		hCost = h;
 
-		if (parentNode) gCost = parentNode->getGCost() + storingData->getKey().findDistance(parentNode->getSquareData()->getKey());
+		if (parentNode) gCost = parentNode->getGCost() + storingData->getKey().findDistance(parentNode->getSquareData()->getKey(), requestingGridMovement);
 		else gCost = 0;
 ;
 	}

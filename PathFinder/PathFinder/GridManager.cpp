@@ -15,13 +15,25 @@ void GridManager::onUpdatePath()
         gridTable->clearExistingPath();
     }
 
+    std::cout << " Start Calculate Path " << std::endl;
+
     // update Path
-    gridTable->tryPathFinding();
+    gridTable->tryPathFinding(currentGridMovement);
 }
 
 bool GridManager::isAbleTryPathFind()
 {
     return (gridTable->getStartSquareData()) && (gridTable->getGoalSquareData());
+}
+
+bool GridManager::setGridMovement(GridMovement newMovement)
+{
+    if (currentGridMovement != newMovement) 
+    {
+        currentGridMovement = newMovement;
+        return true;
+    }
+    return false;
 }
 
 GridTable* GridManager::getGridTable()
@@ -315,4 +327,38 @@ void GridManager::OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::But
 
 GridManager::~GridManager()
 {
+}
+
+void GridManager::tick()
+{
+}
+
+void GridManager::renderGrid(sf::RenderWindow* renderWindow)
+{
+    // Draw grid
+    for (const auto& eachMapObject : gridTable->gridData)
+    {
+        SquareData* eachData = eachMapObject.second->getSquareData();
+        SquareKey eachKey = eachMapObject.first;
+        SquareStatus eachStatus = eachData->getSquareStatus();
+
+
+        if (eachStatus == Empty)
+            eachData->updateRectShapeColor(sf::Color::Yellow);
+        else if (eachStatus == Wall)
+            eachData->updateRectShapeColor(sf::Color::Red);
+        else if (eachStatus == Start)
+            eachData->updateRectShapeColor(sf::Color::Green);
+        else if (eachStatus == Goal)
+            eachData->updateRectShapeColor(sf::Color::Blue);
+        else if (eachStatus == CalculatedPlace)
+            eachData->updateRectShapeColor(sf::Color::Cyan);
+        else
+        {
+            eachData->updateRectShapeColor(PURPLE);
+        }
+
+        renderWindow->draw(eachData->getShape());
+    }
+
 }

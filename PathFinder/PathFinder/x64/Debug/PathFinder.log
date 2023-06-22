@@ -1,3 +1,156 @@
-﻿  GridTable.cpp
-D:\C++Projects\PathFinder\PathFinder\PathFinder\GridTable.cpp(401,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+﻿  GameManager.cpp
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(25,84): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(25,67): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(31,85): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(31,68): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(37,82): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(37,65): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(42,82): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(42,65): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(48,81): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(48,64): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(54,81): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(54,64): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(60,85): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(60,68): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(66,89): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(66,72): warning C4244: 'argument': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(112,44): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\C++Projects\PathFinder\PathFinder\PathFinder\GameManager.cpp(112,37): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
   PathFinder.vcxproj -> D:\C++Projects\PathFinder\PathFinder\x64\Debug\PathFinder.exe
