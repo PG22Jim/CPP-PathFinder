@@ -1,3 +1,5 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #pragma once
 
 #include <map>
@@ -9,11 +11,11 @@
 const int GRID_LENGTH = 600;     // Grid Length
 const int GRID_ROWS = 20;   // Number of grid rows
 const int GRID_COLUMNS = 20; // Number of grid columns
-const int DISTANCE_DIAGONAL = 14;
-const int DISTANCE_STRAIGHT = 10;
-const int PADDING = 40;
+const float DISTANCE_DIAGONAL = 14; // cost to diagonal movement
+const float DISTANCE_STRAIGHT = 10; // cost to straight movement
+const int PADDING = 40; // padding of square
 
-const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS;
+const int SQUARE_SIZE = GRID_LENGTH / GRID_ROWS; // each grid square size
 const float SQUARE_OUTLINE_THICKNESS = 3.0f;
 
 
@@ -27,7 +29,6 @@ enum GridMovement
 	NeighborOnly,
 	DiagonalAlso
 };
-
 
 enum SquareStatus
 {
@@ -48,16 +49,19 @@ private:
 
 public:
 
+	// constructor and destructor
 	SquareKey() { column = 0; row = 0;}
 	SquareKey(int newColumn, int newRow) { column = newColumn; row = newRow; }
+	~SquareKey() {}
 
-
+	// get and set function
 	int getColumn() const { return column; }
-	void setColumn(int newColumn) { column = newColumn; }
 	int getRow() const { return row; }
+
+	void setColumn(int newColumn) { column = newColumn; }
 	void setRow(int newRow) { row = newRow; }
 
-
+	// operator == and < 
 	bool operator==(const SquareKey& other) const
 	{
 		return column == other.column && row == other.row;
@@ -73,20 +77,21 @@ public:
 			return false;
 	}
 
-	int findDistance(const SquareKey& targetKey, GridMovement requestMovement) const
+	// distance calculation
+	float findDistance(const SquareKey& targetKey, GridMovement requestMovement) const
 	{
-		// DIAGONAL DISTANCE
+		// OCTILE DISTANCE
 		if (requestMovement == DiagonalAlso)
 		{
-			int dx = abs(row - targetKey.getRow());
-			int dy = abs(column - targetKey.getColumn());
-			return DISTANCE_STRAIGHT * (dx + dy) + (DISTANCE_DIAGONAL - 2 * DISTANCE_STRAIGHT) * std::min(dx, dy);
+			float dx = abs(row - targetKey.getRow());
+			float dy = abs(column - targetKey.getColumn());
+			return DISTANCE_STRAIGHT * (dx + dy) + (DISTANCE_DIAGONAL - 2.0f * DISTANCE_STRAIGHT) * std::fmin(dx, dy);
 		}
 
 		// MANHATTAN DISTANCE
-		int columnDis = targetKey.getColumn() - column;
-		int rowDis = targetKey.getRow() - row;
-		int returnSum = DISTANCE_STRAIGHT * (abs(columnDis) + abs(rowDis));
+		float columnDis = targetKey.getColumn() - column;
+		float rowDis = targetKey.getRow() - row;
+		float returnSum = DISTANCE_STRAIGHT * (abs(columnDis) + abs(rowDis));
 		return returnSum;
 	}
 };
@@ -104,14 +109,13 @@ private:
 
 
 public:
-	//const int getPositionValue(bool isColumn);
 	
 	// Getters and setters
 	const SquareKey& getKey() { return squareKey; }
 	const SquareKey& getKey_const() const { return squareKey; }
-	void setKey(const SquareKey& newKey) { squareKey = newKey; }
-
 	SquareStatus getSquareStatus() const { return squareStatus; }
+
+	void setKey(const SquareKey& newKey) { squareKey = newKey; }
 	void setSquareStatus(SquareStatus newStatus) { squareStatus = newStatus; }
 
 

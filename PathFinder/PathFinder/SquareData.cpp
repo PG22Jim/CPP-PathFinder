@@ -1,9 +1,11 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #include "SquareData.h"
 
 void SquareData::initializeShape(SquareKey key)
 {
-	const int x = (SQUARE_SIZE * key.getRow());// +PADDING;
-	const int y = (SQUARE_SIZE * key.getColumn());// +PADDING;
+	const int x = (SQUARE_SIZE * key.getRow()) + PADDING;
+	const int y = (SQUARE_SIZE * key.getColumn()) + PADDING;
 
     squareShape.setPosition(sf::Vector2f(x, y));
     squareShape.setSize(sf::Vector2f(SQUARE_SIZE, SQUARE_SIZE));
@@ -11,14 +13,6 @@ void SquareData::initializeShape(SquareKey key)
 	squareShape.setOutlineColor(sf::Color::Black);
 	squareShape.setOutlineThickness(SQUARE_OUTLINE_THICKNESS);
 }
-
-//const int SquareData::getPositionValue(bool isColumn)
-//{
-//	if (isColumn)
-//		return squareKey.getColumn();
-//
-//	return squareKey.getRow();
-//}
 
 void SquareData::updateRectShapeColor(sf::Color color)
 {

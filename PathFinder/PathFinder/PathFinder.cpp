@@ -1,15 +1,11 @@
 // PathFinder.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Copyright © 2022 Jim Chen, All Rights Reserved
 
 #include <iostream>
 #include "GameManager.h"
 
-
 const int WIDTH = 1200;      // Window width
 const int HEIGHT = 900;     // Window height
-
-
-const std::string PATHFOUND_MESSAGE = "Path Found!!";
 
 int main()
 {

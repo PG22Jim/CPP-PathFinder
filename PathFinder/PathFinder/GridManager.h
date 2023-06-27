@@ -1,8 +1,9 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #pragma once
 
 #include "GridTable.h"
 #include "SFML/Graphics.hpp"
-
 
 
 
@@ -15,13 +16,10 @@ private:
 
 
 	GridTable* gridTable;
-	sf::Text MessageBoard;
 	ErrorType currentError = ErrorType::None;
 
 	GridMovement currentGridMovement = NeighborOnly;
-
-
-	bool isAbleTryPathFind();
+	FCostType currentFCostType = Classic;
 
 
 
@@ -30,11 +28,13 @@ public:
 
 	GridTable* getGridTable();
 
-	void onUpdatePath();
-	void onClearExistPath();
+	sf::String onUpdatePath();
 	bool setGridMovement(GridMovement newMovement);
 
-	void OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::Button mouseButtonType);
+	bool setFCostType(FCostType newCostType);
+
+
+	void OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::Button mouseButtonType, bool isLeftKeyHolding, bool isRightKeyHolding);
 
 	bool OnChangeSquare(int column, int row, SquareStatus requestStatus);
 
@@ -45,8 +45,7 @@ public:
 	SquareStatus currentRequestStatus = SquareStatus::Empty;
 	
 
-	GridManager() = delete;
-	GridManager(int column, int row);
+	GridManager();
 	~GridManager();
 
 

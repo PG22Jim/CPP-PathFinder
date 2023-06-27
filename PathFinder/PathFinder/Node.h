@@ -1,36 +1,60 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #pragma once
 
 #include "SquareData.h"
+
+// Weight variable to calculate Fcost
+const float WEIGHT = 2;
+
+
+// Fcost calculation type
+enum FCostType
+{
+	Classic,
+	DynamicWeighted,
+	PiecewiseDownwardCurve,
+	ConvexUpwardParabola,
+};
+
 
 class Node
 {
 private:
 
-	int gCost;
-	int hCost;
+	// actual cost from start to current Node
+	float gCost;
+
+	// estimated cost from current node to goal
+	float hCost;
 
 	SquareData* data;
 	Node* parentNode;
 
+
+
 public:
 
+	
 
 
-	int calculatePathSteps();
+	float getSum(FCostType calculationType) const;
 
-	int getSum() const { return gCost + hCost; }
-	int getGCost() const { return gCost; }
-	int getHCost() const { return hCost; }
-	void setGCost(int newG) { gCost = newG; }
-	void setHCost(int newH) { hCost = newH; }
+	// Get and set functions
+	float getGCost() const { return gCost; }
+	float getHCost() const { return hCost; }
+	SquareData* getSquareData() const { return data; }
+	Node* getParentNode() const { return parentNode; }
+
+	void setGCost(float newG) { gCost = newG; }
+	void setHCost(float newH) { hCost = newH; }
+	void setParentNode(Node* newParentNode) { parentNode = newParentNode; }
+	
+	// reseting node function
 	void resetNode();
 
 
-	SquareData* getSquareData() const { return data; }
-
-	void setParentNode(Node* newParentNode) { parentNode = newParentNode; }
-	Node* getParentNode() const { return parentNode; }
-
+	// constructor
 	Node(SquareData* storingData)
 	{
 		data = storingData;
@@ -39,7 +63,7 @@ public:
 		parentNode = nullptr;
 	}
 
-
+	// constructor
 	Node(SquareData* storingData, Node* storingPreviousData, int h, GridMovement requestingGridMovement)
 	{
 		data = storingData;
@@ -49,8 +73,9 @@ public:
 
 		if (parentNode) gCost = parentNode->getGCost() + storingData->getKey().findDistance(parentNode->getSquareData()->getKey(), requestingGridMovement);
 		else gCost = 0;
-;
 	}
+
+	~Node();
 
 };
 

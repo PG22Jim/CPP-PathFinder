@@ -1,65 +1,45 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #include "GridTable.h"
 
 
 void GridTable::initializeGridTable()
 {
-    // Nested for loop to initialize square data
-    int iterationIndex = 0;
-    for (int i = 0; i < maxRow; i++)
+    // Nested for loop to initialize every node in grid
+    for (int i = 0; i < GRID_ROWS; i++)
     {
-        for (int j = 0; j < maxColumn; j++)
+        for (int j = 0; j < GRID_COLUMNS; j++)
         {
             SquareData* newData = new SquareData(j, i, Empty);
+            SquareKey newDataKey = newData->getKey();
             
             Node* newNode = new Node(newData);
-            SquareKey newDataKey = newData->getKey();
 
+            // use square key as key of map
             gridData.insert({ newDataKey , newNode });
 
-            iterationIndex++;
         }
     }
 
 }
 
-void GridTable::initializeWalls(int wallNum)
+bool GridTable::NodeCompare(const Node* leftNode, const Node* rightNode, FCostType costType) const
 {
-    for (int i = 0; i < wallNum; i++)
+    // if left and right node's Fcost are same
+    const float leftFCost = leftNode->getSum(costType);
+    const float rightFCost = rightNode->getSum(costType);
+    if (leftFCost == rightFCost)
     {
-        bool bIsWallDecided = false;
+        // judge with their HCost
+        const float leftHCost = leftNode->getHCost();
+        const float rightHCost = rightNode->getHCost();
 
-        while (!bIsWallDecided)
-        {
-            // Providing a seed value
-            srand((unsigned)time(NULL));
-
-            //
-            int rndColumn = rand() % 10;
-            int rndRow = rand() % 10;
-
-            SquareData* returnData = getSquareData(rndColumn, rndRow);
-            if (!returnData) continue;
-
-            SquareStatus returnStatus = returnData->getSquareStatus();
-            if (returnStatus != Empty) continue;
-
-            returnData->setSquareStatus(SquareStatus::Wall);
-            bIsWallDecided = true;
-        }
+        return leftHCost > rightHCost;
     }
-}
 
-SquareData* GridTable::generateRandomSquare(int maxColumn, int maxRow, SquareStatus requestStatus)
-{
-    // Providing a seed value
-    srand((unsigned)time(NULL));
+    return leftFCost > rightFCost;
+};
 
-    //
-    int rndColumn = rand() % maxColumn;
-    int rndRow = rand() % maxRow;
-
-    return new SquareData(rndColumn, rndRow, requestStatus);
-}
 
 bool GridTable::squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB)
 {
@@ -69,23 +49,10 @@ bool GridTable::squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB)
 
 void GridTable::clearExistingPath()
 {
+    // if there is no existing path, return
     if (!pathToGoal) return;
 
-
-    //Node* iterateNode = pathToGoal;
-    ////Node* clearingNode = nullptr;
-    //while (iterateNode)
-    //{
-    //    //clearingNode = iterateNode;
-
-    //    // while loop to clear path
-    //    SquareData* currentData = iterateNode->getSquareData();
-    //    if (currentData->getSquareStatus() == Path) currentData->setSquareStatus(Empty);
-
-    //    iterateNode = iterateNode->getParentNode();
-    //    //clearingNode = nullptr;
-    //}
-
+    // for each grid data, reset node if it is not start, goal, or wall
     for (auto item : gridData)
     {
         SquareStatus status = item.second->getSquareData()->getSquareStatus();
@@ -99,8 +66,15 @@ void GridTable::clearExistingPath()
 
 }
 
+bool GridTable::isAblePathFind()
+{
+    // only try path find if start and goal exist
+    return startSquareData && goalSquareData;
+}
+
 SquareData* GridTable::getSquareData(int requestColumn, int requestRow)
 {
+    // return square data if found object in grid data, else return nullptr
     SquareKey findingKey{ requestColumn, requestRow };
     auto foundObject = gridData.find(findingKey);
 
@@ -112,6 +86,7 @@ SquareData* GridTable::getSquareData(int requestColumn, int requestRow)
 
 Node* GridTable::tryGetGridFromTable(int requestColumn, int requestRow)
 {
+    // return node if found object in grid data, else return nullptr
     SquareKey findingKey{ requestColumn, requestRow };
     auto foundObject = gridData.find(findingKey);
 
@@ -130,13 +105,16 @@ void GridTable::swapSquareStatus(SquareData* squareA, SquareData* squareB)
     squareB->setSquareStatus(statusA);
 }
 
-ErrorType GridTable::tryPathFinding(GridMovement requestingMovement)
+sf::String GridTable::tryPathFinding(GridMovement requestingMovement, FCostType costType)
 {
-    if (!startSquareData || !goalSquareData) return ErrorType::MissingStartGoal;
+    // early return if player haven't put start and goal
+    if (!startSquareData || !goalSquareData) return MISSSTARTENDMESSAGE;
+    
     pathToGoal = nullptr;
 
     // initialize openset, closeset, and pathNode
-    eraseAllNode();
+    openSet.clear();
+    closeSet.clear();
     clearExistingPath();
 
 
@@ -145,14 +123,18 @@ ErrorType GridTable::tryPathFinding(GridMovement requestingMovement)
     int startHCost = currentStartSquareKey.findDistance(goalSquareData->getKey(), requestingMovement);
     addNewOpenSet(new Node(startSquareData, nullptr, startHCost, requestingMovement));
 
+    // start timer
+    auto start = std::chrono::system_clock::now();
+    
     // iteration begin
     while (!openSet.empty())
     {
+        // get next explore node
+        Node* nextExploreNode = findNextExploreNode(costType);
 
-        Node* nextExploreNode = findNextExploreNode();
-        //Node* nextExploreNode = openSet.begin()->second;
         if (nextExploreNode)
         {
+            // remove exploring node from openset and move to close set
             removeOpenSet(nextExploreNode);
             addNewCloseSet(nextExploreNode);
 
@@ -160,30 +142,41 @@ ErrorType GridTable::tryPathFinding(GridMovement requestingMovement)
             SquareStatus exploreStatus = nextExploreNode->getSquareData()->getSquareStatus();
             if (exploreStatus == SquareStatus::Goal)
             {
-                // assign it as pathToGoal, remove from openSet, then clear openSet
+                // assign it as pathToGoal, and allocate it
                 pathToGoal = nextExploreNode;
                 removeOpenSet(pathToGoal);
                 allocatePathToGoal();
-                return ErrorType::None;
+
+                // return found message with elapsed time
+                auto end = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_seconds = end - start;
+                
+                return getPathFindMessage(elapsed_seconds.count(), requestingMovement, costType);
             }
 
             // find all walkable neighbors around nextExploreNode
             std::vector<Node*> successorNodes = getValidNeighborNodes(nextExploreNode, requestingMovement);
-            //std::vector<SquareData*> validNeighbors = getValidNeighborNodes(nextExploreNode);
 
+            // for each walkable neighbors
             for (Node* eachNeighbor : successorNodes)
             {
+                // calcualte tentative GCost
                 SquareKey neighborKey = eachNeighbor->getSquareData()->getKey();
-                int tentativeGCost = nextExploreNode->getGCost() + neighborKey.findDistance(nextExploreNode->getSquareData()->getKey(), requestingMovement);
+                float tentativeGCost = nextExploreNode->getGCost() + neighborKey.findDistance(nextExploreNode->getSquareData()->getKey(), requestingMovement);
+
+                // check if neighbor is in openset
                 auto foundItem = openSet.find(neighborKey);
                 const bool bItemFound = foundItem != openSet.end();
 
+                // if tentative GCost is lower than neighbor's written GCost or it is not in openset
                 if (tentativeGCost < eachNeighbor->getGCost() || !bItemFound)
                 {
+                    // update Gcost, HCost and parent node
                     eachNeighbor->setGCost(tentativeGCost);
                     eachNeighbor->setHCost(eachNeighbor->getSquareData()->getKey().findDistance(goalSquareData->getKey(), requestingMovement));
                     eachNeighbor->setParentNode(nextExploreNode);
 
+                    // if it is not found, put it into openset
                     if (!bItemFound) 
                     {
                         addNewOpenSet(eachNeighbor);
@@ -193,37 +186,30 @@ ErrorType GridTable::tryPathFinding(GridMovement requestingMovement)
         }
     }
 
-    // if openset is empty, all possible squares are explored. return Error NoValidPath
-    eraseAllNode();
-    return ErrorType::NoValidPath;
+    // if openset is empty, all possible squares are explored. return NoValidPath error message
+    return NOVALIDPATHMESSAGE;
 }
 
 std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode, GridMovement requestingGridMovement)
 {
+    // empty vector
     std::vector<Node*> returnVector;
 
+    // get column and row of exploring node
     SquareData* exploringSquareData = exploringNode->getSquareData();
     SquareKey exploringKey = exploringSquareData->getKey();
     int exploreColumn = exploringKey.getColumn();
     int exploreRow = exploringKey.getRow();
 
-
+    // try to check if upNode is exist in grid
     Node* upNode = tryGetGridFromTable((exploreColumn - 1), exploreRow);
     if (upNode) 
     {
+        // check if we can explore this node
         if (canExploreThisSquare(upNode->getSquareData()))
         {
+            // if true, add into vector
             returnVector.push_back(upNode);
-        }
-    }
-
-
-    Node* downNode = tryGetGridFromTable((exploreColumn + 1), exploreRow);
-    if (downNode)
-    {
-        if (canExploreThisSquare(downNode->getSquareData()))
-        {
-            returnVector.push_back(downNode);
         }
     }
 
@@ -245,6 +231,16 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode, GridMov
         }
     }
 
+    Node* downNode = tryGetGridFromTable((exploreColumn + 1), exploreRow);
+    if (downNode)
+    {
+        if (canExploreThisSquare(downNode->getSquareData()))
+        {
+            returnVector.push_back(downNode);
+        }
+    }
+
+    // check diagonal nodes if movement is including diagonal
     if (requestingGridMovement == DiagonalAlso)
     {
         Node* upleftNode = tryGetGridFromTable((exploreColumn - 1), exploreRow -1);
@@ -275,7 +271,7 @@ std::vector<Node*> GridTable::getValidNeighborNodes(Node* exploringNode, GridMov
         }
 
         Node* downrightNode = tryGetGridFromTable((exploreColumn + 1), exploreRow + 1);
-        if (downleftNode)
+        if (downrightNode)
         {
             if (canExploreThisSquare(downrightNode->getSquareData()))
             {
@@ -296,11 +292,13 @@ bool GridTable::canExploreThisSquare(SquareData* checkingData)
     SquareStatus checkingSquareStatus = checkingData->getSquareStatus();
     SquareKey checkingSquareKey = checkingData->getKey();
 
+    // no need to explore wall or start square
     if(checkingSquareStatus == ::Wall) return false;
     if(checkingSquareStatus == ::Start) return false;
 
     if (!closeSet.empty())
     {
+        // return false if square is in closeset
         auto findingItem = closeSet.find(checkingSquareKey);
         if (findingItem != closeSet.end())
         {
@@ -309,52 +307,8 @@ bool GridTable::canExploreThisSquare(SquareData* checkingData)
     }
 
 
-    // if checking square is not start, wall, or goal, it means it is exploreable
+    // if checking square is not start, wall, or in closeset, it means it is exploreable
     return true;
-}
-
-void GridTable::eraseAllNode()
-{
-    clearCloseSet();
-    clearOpenSet();
-}
-
-void GridTable::clearOpenSet()
-{
-    if (openSet.size() > 0) 
-    {
-        for (auto itemInOpenSet : openSet)
-        {
-            Node* eachOpenNode = itemInOpenSet.second;
-            // For each open node, check if it is path, start, or goal, if true, no need to erase pointer
-            SquareStatus eachNodeStatus = eachOpenNode->getSquareData()->getSquareStatus();
-            if (eachNodeStatus != CalculatedPlace) continue;
-
-            eachOpenNode->getSquareData()->setSquareStatus(Empty);
-            eachOpenNode = nullptr;
-        }
-    }
-
-    openSet.clear();
-}
-
-void GridTable::clearCloseSet()
-{
-    if (closeSet.size() > 0)
-    {
-        for (auto itemInCloseSet : closeSet)
-        {
-            Node* eachcloseNode = itemInCloseSet.second;
-            // For each open node, check if it is path, start, or goal, if true, no need to erase pointer
-            SquareStatus eachNodeStatus = eachcloseNode->getSquareData()->getSquareStatus();
-            if (eachNodeStatus != CalculatedPlace) continue;
-
-            eachcloseNode->getSquareData()->setSquareStatus(Empty);
-            eachcloseNode = nullptr;
-        }
-    }
-
-    closeSet.clear();
 }
 
 void GridTable::allocatePathToGoal()
@@ -399,11 +353,11 @@ void GridTable::allocatePathToGoal()
     }
 }
 
-Node* GridTable::findNextExploreNode()
+Node* GridTable::findNextExploreNode(FCostType costType)
 {
-    int openSetSize = openSet.size();
 
-    // if there is no node in openset
+    // return nullptr if there is no node in openset
+    int openSetSize = openSet.size();
     if (openSetSize == 0)
     {
         return nullptr;
@@ -417,24 +371,12 @@ Node* GridTable::findNextExploreNode()
         return bestNode;
     }
 
-
-    // if there are more than 1 node in openSet
+    // for each node in openset, compare node and replace the best node if current node is better exploring point
     for (auto item : openSet)
     {
-        Node* iterateNode = item.second;
-        const int iterateFCost = iterateNode->getSum();
-        const int bestNodeFCost = bestNode->getSum();
-
-        if (iterateFCost < bestNodeFCost) 
+        if (NodeCompare(bestNode, item.second, costType))
         {
-            bestNode = iterateNode;
-        }
-        else if (iterateFCost == bestNodeFCost) 
-        {
-            if (iterateNode->getHCost() < bestNode->getHCost())
-            {
-                bestNode = iterateNode;
-            }
+            bestNode = item.second;
         }
     }
 
@@ -457,20 +399,30 @@ void GridTable::addNewCloseSet(Node* addingNode)
     closeSet.insert({ addingNode->getSquareData()->getKey(), addingNode });
 }
 
-GridTable::GridTable()
+std::string GridTable::getPathFindMessage(float elapsedTime, GridMovement requestingMovement, FCostType costType) const
 {
-    initializeGridTable();
+    std::string movementString;
+
+    if (requestingMovement == DiagonalAlso) movementString = "Diagonal Also";
+    else movementString = "Orthogonal Only";
+
+    std::string costTypeString;
+
+    if (costType == Classic) costTypeString = "Classic";
+    else if (costType == ConvexUpwardParabola) costTypeString = "Convex Upward Parabola";
+    else if (costType == DynamicWeighted) costTypeString = "Dynamic Weighted";
+    else costTypeString = "Piecewise Downward Curve";
+
+
+    return "Path Found! \nUsing Grid Method: " + movementString + "\nUsing Heuristic Function: " + costTypeString + "\nElapsed Time is: " + std::to_string(elapsedTime) + "s";
 }
 
-GridTable::GridTable(int column, int row)
+GridTable::GridTable()
 {
-    maxColumn = column;
-    maxRow = row;
-    maxWallNum = (maxColumn * maxRow) / 5;
+    maxWallNum = (GRID_COLUMNS * GRID_ROWS) / 5;
     currentWallNum = 0;
     initializeGridTable();
 }
-
 
 GridTable::~GridTable()
 {

@@ -1,30 +1,18 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #include "GridManager.h"
 
-GridManager::GridManager(int column, int row)
+GridManager::GridManager()
 {
-	gridTable = new GridTable(column, row);
+	gridTable = new GridTable();
 }
 
-void GridManager::onUpdatePath()
+sf::String GridManager::onUpdatePath()
 {
-    // If there is any showing path
-    if (gridTable->getPathToGoal())
-    {
-        // clear path openset, closeset, and pathNode
-        gridTable->eraseAllNode();
-        gridTable->clearExistingPath();
-    }
-
-    std::cout << " Start Calculate Path " << std::endl;
-
     // update Path
-    gridTable->tryPathFinding(currentGridMovement);
+    return gridTable->tryPathFinding(currentGridMovement, currentFCostType);
 }
 
-bool GridManager::isAbleTryPathFind()
-{
-    return (gridTable->getStartSquareData()) && (gridTable->getGoalSquareData());
-}
 
 bool GridManager::setGridMovement(GridMovement newMovement)
 {
@@ -36,21 +24,19 @@ bool GridManager::setGridMovement(GridMovement newMovement)
     return false;
 }
 
+bool GridManager::setFCostType(FCostType newCostType)
+{
+    if (currentFCostType != newCostType)
+    {
+        currentFCostType = newCostType;
+        return true;
+    }
+    return false;
+}
+
 GridTable* GridManager::getGridTable()
 {
 	return gridTable;
-}
-
-void GridManager::onClearExistPath()
-{
-
-    // If there is any showing path
-    if (gridTable->getPathToGoal())
-    {
-        // clear path
-        gridTable->clearExistingPath();
-
-    }
 }
 
 bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus)
@@ -277,50 +263,29 @@ bool GridManager::OnChangeSquare(int column, int row, SquareStatus requestStatus
 
 
 
-void GridManager::OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::Button mouseButtonType)
+void GridManager::OnReceiveUserMouseButton(sf::Vector2i mousePos, sf::Mouse::Button mouseButtonType, bool isLeftKeyHolding, bool isRightKeyHolding)
 {
-    // If the left mouse button is pressed
-    if (mouseButtonType == sf::Mouse::Left)
+
+    // Print mouse position if mouse cursor position is in grid
+    if (GRID_LENGTH + PADDING > mousePos.x && GRID_LENGTH + PADDING > mousePos.y)
     {
-        // Print mouse position if mouse cursor position is in grid
-        if (GRID_LENGTH > mousePos.x && GRID_LENGTH > mousePos.y)
+        // convert vector 2D mouse to row and column
+        const int mouseRow = (mousePos.x - PADDING) / SQUARE_SIZE;
+        const int mouseColumn = (mousePos.y - PADDING) / SQUARE_SIZE;
+
+        bool bIsSquareChanged = false;
+
+        // If the left mouse button is pressed
+        if (mouseButtonType == sf::Mouse::Left || isLeftKeyHolding)
+            bIsSquareChanged = OnChangeSquare(mouseColumn, mouseRow, currentRequestStatus);
+        
+        // If the right mouse button is pressed
+        else if (mouseButtonType == sf::Mouse::Right || isRightKeyHolding)
+            bIsSquareChanged = OnChangeSquare(mouseColumn, mouseRow, Empty);
+        
+        if (bIsSquareChanged && gridTable->isAblePathFind() && gridTable->getPathToGoal())
         {
-            // convert vector 2D mouse to row and column
-            const int mouseRow = mousePos.x / SQUARE_SIZE;
-            const int mouseColumn = mousePos.y / SQUARE_SIZE;
-
-
-            if (OnChangeSquare(mouseColumn, mouseRow, currentRequestStatus)) 
-            {
-                if (isAbleTryPathFind() && gridTable->getPathToGoal())
-                {
-                    onUpdatePath();
-                }
-            }
-
-
-        }
-    }
-
-    // If the right mouse button is pressed
-    else if (mouseButtonType == sf::Mouse::Right)
-    {
-        // Print mouse position if mouse cursor position is in grid
-        if (GRID_LENGTH > mousePos.x && GRID_LENGTH > mousePos.y)
-        {
-            // convert vector 2D mouse to row and column
-            const int mouseRow = mousePos.x / SQUARE_SIZE;
-            const int mouseColumn = mousePos.y / SQUARE_SIZE;
-
-            // Right click means removing square
-            if (OnChangeSquare(mouseColumn, mouseRow, Empty))
-            {
-                if (isAbleTryPathFind() && gridTable->getPathToGoal())
-                {
-                    onUpdatePath();
-                }
-            }
-
+            onUpdatePath();
         }
     }
 }

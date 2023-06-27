@@ -1,3 +1,5 @@
+// Copyright © 2022 Jim Chen, All Rights Reserved
+
 #pragma once
 #include <cstdlib>
 #include <vector>
@@ -6,7 +8,13 @@
 #include "SquareData.h"
 #include <map>
 #include <algorithm>
+#include <queue>
+#include <chrono>
+#include <ctime> 
 
+// Message variables
+const sf::String MISSSTARTENDMESSAGE = "Cannot Find Path Without Start or End Point.";
+const sf::String NOVALIDPATHMESSAGE = "No Valid Path, Make Sure There is a Path.";
 
 
 enum ErrorType
@@ -19,9 +27,6 @@ enum ErrorType
 };
 
 
-
-
-
 class GridTable
 {
 private:
@@ -29,15 +34,9 @@ private:
 	SquareData* startSquareData = nullptr;
 	SquareData* goalSquareData = nullptr;
 
-	//std::vector<SquareData*> SquareList;
-	//std::vector<Node*> openSet;
-	//std::vector<Node*> closeSet;
+
 	std::map<SquareKey, Node*> openSet;
 	std::map<SquareKey, Node*> closeSet;
-
-
-	int maxColumn = 10;
-	int maxRow = 10;
 
 	int maxWallNum = 10;
 	int currentWallNum = 0;
@@ -45,49 +44,50 @@ private:
 
 
 
-
 	Node* pathToGoal = nullptr;
 
-
+	// initialization functions
 	void initializeGridTable();
 
-	void initializeWalls(int wallNum);
-
-	SquareData* generateRandomSquare(int maxColumn, int maxRow, SquareStatus requestStatus);
-
-	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
-
-
+	Node* findNextExploreNode(FCostType costType);
 	std::vector<Node*> getValidNeighborNodes(Node* exploringNode, GridMovement requestingGridMovement);
-
 	bool canExploreThisSquare(SquareData* checkingNode);
-
-
-
 
 	void allocatePathToGoal();
 
+	bool squareCompare_IsSamePos(SquareData* dataA, SquareData* dataB);
+	bool NodeCompare(const Node* leftNode, const Node* rightNode, FCostType costType) const;
 
-	Node* findNextExploreNode();
 
-
+	// open set and close set adding and removing function
 	void addNewOpenSet(Node* addingNode);
-
 	void removeOpenSet(Node* removingNode);
-
 	void addNewCloseSet(Node* addingNode);
 
+	std::string getPathFindMessage(float elapsedTime, GridMovement requestingMovement, FCostType costType) const;
 
 public:
 
 	std::map<SquareKey, Node*> gridData;
 	
 	
-	// Get set functions
+	sf::String tryPathFinding(GridMovement requestingMovement, FCostType costType);
 	Node* getPathToGoal() const { return pathToGoal; }
 	void clearExistingPath();
-	void eraseAllNode();
 
+	void swapSquareStatus(SquareData* squareA, SquareData* squareB);
+
+
+
+	// wall functions
+	bool isAbleToAddMoreWall() const { return currentWallNum + 1 <= maxWallNum; }
+	void currentWallNumIncrement() { currentWallNum++; }
+	void currentWallNumDecrement() { currentWallNum--; }
+	
+
+	// Get set functions
+
+	bool isAblePathFind();
 
 	SquareData* getSquareData(int requestColumn, int requestRow);
 	Node* tryGetGridFromTable(int requestColumn, int requestRow);
@@ -98,19 +98,8 @@ public:
 	SquareData* getGoalSquareData() const { return goalSquareData; }
 	void setGoalSquareData(SquareData* newData) { goalSquareData = newData; }
 
-	void swapSquareStatus(SquareData* squareA, SquareData* squareB);
-
-	void clearOpenSet();
-	void clearCloseSet();
-
-	bool isAbleToAddMoreWall() const { return currentWallNum + 1 <= maxWallNum; }
-	void currentWallNumIncrement() { currentWallNum++; }
-	void currentWallNumDecrement() { currentWallNum--; }
-	
-	ErrorType tryPathFinding(GridMovement requestingMovement);
-
+	// constructor and destructor
 	GridTable();
-	GridTable(int column, int row);
 	~GridTable();
 };
 
